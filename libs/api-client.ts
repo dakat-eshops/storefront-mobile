@@ -31,7 +31,7 @@ type Method = 'GET' | 'POST' | 'PATCH' | 'DELETE';
  * mobile-specific guards (App Attest / Play Integrity verification) without
  * interfering with the existing `fo/` web routes.
  *
- * See FO/KhanhStore/docs/react_native/04-api-client.md.
+ * See docs/_initial/04-api-client.md.
  */
 export function useApiClient() {
   const { getToken } = useAuth();

@@ -11,7 +11,7 @@ import { supabase } from '../supabase';
  * Channel: store:{storeId}:inventory
  * Event:   inventory_update
  *
- * See FO/KhanhStore/docs/react_native/06-realtime.md and the FO web mirror
+ * See docs/_initial/06-realtime.md and the FO web mirror
  * at FO/KhanhStore/src/libs/realtime/useInventoryRealtime.ts.
  */
 export function useInventoryBroadcast(storeId: string | undefined) {

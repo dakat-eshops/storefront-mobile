@@ -3,7 +3,7 @@ import type { TokenCache } from '@clerk/clerk-expo/dist/cache';
 
 /**
  * Clerk token cache backed by Expo SecureStore (iOS Keychain / Android Keystore).
- * See FO/KhanhStore/docs/react_native/03-authentication.md.
+ * See docs/_initial/03-authentication.md.
  */
 export const tokenCache: TokenCache = {
   async getToken(key) {

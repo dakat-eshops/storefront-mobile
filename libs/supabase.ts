@@ -8,7 +8,7 @@ import { env } from './env';
  * - `auth.persistSession: false` — Clerk owns auth; we never use Supabase auth on mobile.
  * - `realtime.params.eventsPerSecond: 10` — throttle inbound Broadcast events.
  *
- * See FO/KhanhStore/docs/react_native/06-realtime.md.
+ * See docs/_initial/06-realtime.md.
  */
 export const supabase = createClient(env.supabaseUrl, env.supabaseAnonKey, {
   auth: {

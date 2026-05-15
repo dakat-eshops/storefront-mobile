@@ -1,6 +1,6 @@
 # Products feature
 
-Per FO/KhanhStore/docs/react_native/. Mirrors web FO `src/features/product/`:
+Per docs/. Mirrors web FO `src/features/product/`:
 
 - `collections/` — TanStack Query keys + DB collections
 - `hooks/` — `useProducts`, `useProductDetail`

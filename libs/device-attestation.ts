@@ -20,7 +20,7 @@ import { env } from './env';
  * request still goes out and NestJS will reject it with 401 — which is the
  * correct fail-closed behaviour for a security feature.
  *
- * See FO/KhanhStore/docs/react_native/04-api-client.md.
+ * See docs/_initial/04-api-client.md.
  */
 
 const KEY_ID_STORAGE = 'app-attest-key-id';
