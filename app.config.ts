@@ -7,7 +7,7 @@ import type { ExpoConfig, ConfigContext } from 'expo/config';
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: config.name ?? 'KhanhStore',
-  slug: config.slug ?? 'khanhstore-mobile',
+  slug: config.slug ?? 'storefront-mobile',
   extra: {
     ...config.extra,
     apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL,

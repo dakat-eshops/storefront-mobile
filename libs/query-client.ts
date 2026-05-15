@@ -7,7 +7,7 @@ import { env } from './env';
  * MMKV-backed persister. MMKV is sync; we wrap with Promise.resolve to
  * satisfy the async storage interface that the persister expects.
  */
-const storage = new MMKV({ id: 'khanhstore-query-cache' });
+const storage = new MMKV({ id: 'storefront-query-cache' });
 
 const mmkvStorage = {
   getItem: (key: string) => Promise.resolve(storage.getString(key) ?? null),
@@ -24,7 +24,7 @@ const mmkvStorage = {
 export const persister = createAsyncStoragePersister({
   storage: mmkvStorage,
   // Bust cache between app versions to avoid stale shape mismatches.
-  key: `khanhstore-query-${env.appVersion}`,
+  key: `storefront-query-${env.appVersion}`,
 });
 
 export const queryClient = new QueryClient({
