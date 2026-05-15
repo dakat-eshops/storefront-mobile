@@ -3,9 +3,8 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"],
+      "@eshops/db/types": ["../../BO/e-Shops/packages/db/src/index.ts"]
     }
   },
   "include": [
