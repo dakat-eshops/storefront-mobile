@@ -35,10 +35,11 @@ The grand total shown on the review screen MUST match the server-side calculatio
 
 ```ts
 // Fetch a confirmed price quote; server re-validates coupon validity, loyalty balance, etc.
+const api = useApiClient();
 const { data: quote } = useQuery({
   queryKey: checkoutQueryKeys.quote({ cartId, couponCode, loyaltyPointsToUse }),
   queryFn: () =>
-    api.post('/fo-mobile/stores/:storeId/checkout/quote', {
+    api.post('/checkout/quote', {
       cartId,
       couponCode,
       loyaltyPointsToUse,

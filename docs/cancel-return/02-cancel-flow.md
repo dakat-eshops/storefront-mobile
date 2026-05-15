@@ -24,14 +24,16 @@ When the user selects "Lý do khác", show a text input for a custom reason.
 ```ts
 // features/cancel-return/hooks/use-cancel-order.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useApiClient } from '@/libs/api-client';
 import { orderQueryKeys } from '../../orders/collections/queryKeys';
 
 export function useCancelOrder(orderId: string) {
   const queryClient = useQueryClient();
+  const api = useApiClient();
 
   return useMutation({
     mutationFn: ({ reason, note }: { reason: string; note?: string }) =>
-      api.post(`/fo-mobile/stores/${STORE_ID}/cancel-requests`, {
+      api.post(`/cancel-requests`, {
         orderId,
         reason,
         note,

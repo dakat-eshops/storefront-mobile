@@ -13,8 +13,8 @@
 From `~/TheAstronaut/projects/e-commerce/FO/`:
 
 ```bash
-pnpm create expo-app@latest KhanhStore-mobile --template default
-cd KhanhStore-mobile
+pnpm create expo-app@latest storefront-mobile --template default
+cd storefront-mobile
 ```
 
 Pin the SDK in `package.json` (Expo SDK 53 = RN 0.79; bump to 54 once stable):
@@ -43,21 +43,20 @@ pnpm add \
   expo-router expo-secure-store expo-image expo-notifications expo-linking expo-constants \
   expo-application expo-device expo-crypto \
   react-native-mmkv \
-  react-native-app-integrity \
   react-native-url-polyfill \
   zustand
 
 pnpm add -D typescript @types/react eslint-config-expo
 ```
 
-`@tanstack/query-db-collection` provides `queryCollectionOptions` (the authed cart/wishlist driver — same package the web FO uses). `react-native-app-integrity` wraps Apple App Attest + Google Play Integrity for the `DeviceAttestationGuard` on the mobile gateway.
+`@tanstack/query-db-collection` provides `queryCollectionOptions` (the authed cart/wishlist driver — same package the web FO uses). Device attestation is implemented as a **custom Expo native module** in `apps/native/app-integrity/` (wraps Apple App Attest + Google Play Integrity — see [04-api-client.md](04-api-client.md)).
 
-`react-native-mmkv` is the storage driver for the TanStack Query persister and for guest cart/wishlist. It is ~30× faster than `AsyncStorage` and synchronous, which TanStack DB's localStorage-style driver expects.
+`react-native-mmkv` is the storage driver for the TanStack Query persister and for guest cart/wishlist.
 
 ## Project structure
 
-```
-KhanhStore-mobile/
+```text
+storefront-mobile/
 ├── app/                                # Expo Router (file-based routing)
 │   ├── _layout.tsx                    # Root: ClerkProvider, QueryClientProvider, ThemeProvider
 │   ├── (auth)/

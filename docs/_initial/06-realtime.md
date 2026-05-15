@@ -44,10 +44,11 @@ import { inventoryQueryKeys } from '@/features/inventory/collections/queryKeys';
 
 type InventoryUpdatePayload = {
   productId: string;
-  variantId?: string;
-  branchId?: string;
-  inStock: boolean;
-  qty: number;
+  productSlug: string;
+  itemInventoryId: string;
+  quantity: number;       // new absolute quantity for this item inventory
+  isInStock: boolean;     // true if any variant has quantity > 0
+  totalQuantity: number;  // sum across all variants
 };
 
 export function useInventoryBroadcast(storeId: string) {

@@ -23,13 +23,17 @@ COD MUST be the default selected method and MUST appear first in the list. This 
 The store's available payment methods are configured in the BO by `payment_methods` records. The FO fetches them at app start and stores them via TanStack Query:
 
 ```ts
-// features/checkout/server/queries.ts
-const paymentMethodsQuery = {
-  queryKey: checkoutQueryKeys.paymentMethods(storeId),
-  queryFn: () =>
-    api.get<PaymentMethod[]>(`/fo-mobile/stores/${storeId}/payment-methods`),
-  staleTime: 1000 * 60 * 60,   // 1 hour — payment config is low-change
-};
+// features/checkout/hooks/use-payment-methods.ts
+export function usePaymentMethods() {
+  const api = useApiClient();
+
+  return useQuery({
+    queryKey: checkoutQueryKeys.paymentMethods(storeId),
+    queryFn: ({ signal }) =>
+      api.get<PaymentMethod[]>(`/payment-methods`, signal),
+    staleTime: 1000 * 60 * 60,   // 1 hour — payment config is low-change
+  });
+}
 ```
 
 ## Integration decision matrix

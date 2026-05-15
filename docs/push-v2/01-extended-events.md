@@ -51,7 +51,7 @@ interface ReturnStatusPush {
   type: 'return_status_update';
   orderId: string;
   returnRequestId: string;
-  status: 'items_received' | 'inspected' | 'refund_issued' | 'rejected';
+  status: 'items_received' | 'inspected' | 'approved' | 'refund_issued' | 'rejected';
   refundAmount?: number;
   loyaltyPointsRestored?: number;
 }

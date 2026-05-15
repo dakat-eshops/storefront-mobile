@@ -11,19 +11,19 @@ Use `useInfiniteQuery` for pagination — orders accumulate over time and a user
 ```ts
 // features/orders/hooks/use-orders.ts
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { useApiClient } from '@/libs/api-client';
 import { orderQueryKeys } from '../collections/queryKeys';
 
 const PAGE_SIZE = 20;
 
 export function useOrders() {
   const profileId = useProfileId();   // from Clerk
+  const api = useApiClient();
 
   return useInfiniteQuery({
     queryKey: orderQueryKeys.list(profileId),
-    queryFn: ({ pageParam = 0 }) =>
-      api.get<OrderListResponse>(`/fo-mobile/stores/${STORE_ID}/me/orders`, {
-        params: { limit: PAGE_SIZE, offset: pageParam },
-      }),
+    queryFn: ({ pageParam = 0, signal }) =>
+      api.get<OrderListResponse>(`/me/orders?limit=${PAGE_SIZE}&offset=${pageParam}`, signal),
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
       const loaded = pages.length * PAGE_SIZE;

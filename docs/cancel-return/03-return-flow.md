@@ -64,14 +64,22 @@ async function pickEvidencePhotos(): Promise<string[]> {
 Upload photos to the media endpoint before submitting the return request:
 
 ```ts
+// api.post sets Content-Type: application/json and JSON.stringifies the body, so it cannot
+// send multipart/form-data. Use fetch directly for the upload.
 async function uploadEvidencePhotos(uris: string[]): Promise<string[]> {
   return Promise.all(
-    uris.map((uri) => {
+    uris.map(async (uri) => {
       const formData = new FormData();
       formData.append('file', { uri, name: 'evidence.jpg', type: 'image/jpeg' } as unknown as Blob);
-      return api.post<{ url: string }>('/fo-mobile/media/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      }).then((r) => r.url);
+      const { apiBaseUrl, apiVersion, storeId } = getApiConfig();
+      const res = await fetch(`${apiBaseUrl}/${apiVersion}/fo-mobile/stores/${storeId}/media/upload`, {
+        method: 'POST',
+        body: formData,
+        // Do NOT set Content-Type — fetch sets multipart/form-data with boundary automatically
+      });
+      if (!res.ok) throw new Error('Upload failed');
+      const json = await res.json();
+      return json.url as string;
     }),
   );
 }
@@ -82,6 +90,7 @@ async function uploadEvidencePhotos(uris: string[]): Promise<string[]> {
 ```ts
 export function useCreateReturnRequest(orderId: string) {
   const queryClient = useQueryClient();
+  const api = useApiClient();
 
   return useMutation({
     mutationFn: async (data: ReturnRequestInput) => {
@@ -90,7 +99,7 @@ export function useCreateReturnRequest(orderId: string) {
         ? await uploadEvidencePhotos(data.evidenceUris)
         : [];
 
-      return api.post(`/fo-mobile/stores/${STORE_ID}/return-requests`, {
+      return api.post(`/return-requests`, {
         orderId,
         items: data.selectedItems,
         reason: data.reason,

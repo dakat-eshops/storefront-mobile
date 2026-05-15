@@ -31,22 +31,22 @@ function createGuestWishlistCollection() {
   );
 }
 
-function createAuthedWishlistCollection(queryClient: QueryClient) {
+function createAuthedWishlistCollection(queryClient: QueryClient, api: ReturnType<typeof useApiClient>) {
   return createCollection(
     queryCollectionOptions<WishlistItem>({
       id: 'wishlist-authed',
       queryKey: wishlistQueryKeys.all(),
       queryFn: () =>
-        api.get<WishlistItem[]>(`/fo-mobile/stores/${STORE_ID}/me/wishlist`),
+        api.get<WishlistItem[]>(`/me/wishlist`),
       queryClient,
       getKey: (item) => item.productId,
       onInsert: async ({ transaction }) => {
         const { productId } = transaction.mutations[0].modified;
-        await api.post(`/fo-mobile/stores/${STORE_ID}/me/wishlist`, { productId });
+        await api.post(`/me/wishlist`, { productId });
       },
       onDelete: async ({ transaction }) => {
         const { productId } = transaction.mutations[0].original;
-        await api.delete(`/fo-mobile/stores/${STORE_ID}/me/wishlist/${productId}`);
+        await api.delete(`/me/wishlist/${productId}`);
       },
       // No onUpdate — wishlist items are binary (present / absent)
     }),
@@ -56,10 +56,11 @@ function createAuthedWishlistCollection(queryClient: QueryClient) {
 export function useWishlistCollection() {
   const { isSignedIn } = useUser();
   const queryClient = useQueryClient();
+  const api = useApiClient();
 
   return useMemo(
-    () => (isSignedIn ? createAuthedWishlistCollection(queryClient) : createGuestWishlistCollection()),
-    [isSignedIn, queryClient],
+    () => (isSignedIn ? createAuthedWishlistCollection(queryClient, api) : createGuestWishlistCollection()),
+    [isSignedIn, queryClient, api],
   );
 }
 ```
@@ -128,6 +129,7 @@ On sign-in, read the guest MMKV collection and sync to the server:
 // components/providers/wishlist-sync-provider.tsx
 export function WishlistSyncProvider({ children }: { children: React.ReactNode }) {
   const { isSignedIn, isLoaded } = useUser();
+  const api = useApiClient();
 
   useEffect(() => {
     if (!isLoaded || !isSignedIn) return;
@@ -140,7 +142,7 @@ export function WishlistSyncProvider({ children }: { children: React.ReactNode }
     if (guestItems.length === 0) return;
 
     api
-      .post(`/fo-mobile/stores/${STORE_ID}/me/wishlist/sync`, {
+      .post(`/me/wishlist/sync`, {
         productIds: guestItems.map((i) => i.productId),
       })
       .then(() => {
@@ -149,7 +151,7 @@ export function WishlistSyncProvider({ children }: { children: React.ReactNode }
       .catch(() => {
         // Guest items stay in MMKV; sync will retry next time
       });
-  }, [isLoaded, isSignedIn]);
+  }, [isLoaded, isSignedIn, api]);
 
   return <>{children}</>;
 }
