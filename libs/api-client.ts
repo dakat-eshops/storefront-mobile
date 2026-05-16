@@ -43,7 +43,7 @@ export function useApiClient() {
   );
 
   const request = useCallback(
-    async <T>(method: Method, path: string, body?: unknown): Promise<T> => {
+    async <T>(method: Method, path: string, body?: unknown, signal?: AbortSignal): Promise<T> => {
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         'x-app-version': env.appVersion,
@@ -58,6 +58,7 @@ export function useApiClient() {
         method,
         headers,
         body: body !== undefined ? JSON.stringify(body) : undefined,
+        signal,
       });
 
       let parsed: ApiResponse<T> | undefined;
@@ -82,7 +83,7 @@ export function useApiClient() {
 
   return useMemo(
     () => ({
-      get: <T>(path: string) => request<T>('GET', path),
+      get: <T>(path: string, signal?: AbortSignal) => request<T>('GET', path, undefined, signal),
       post: <T>(path: string, body?: unknown) => request<T>('POST', path, body),
       patch: <T>(path: string, body?: unknown) => request<T>('PATCH', path, body),
       delete: <T>(path: string) => request<T>('DELETE', path),

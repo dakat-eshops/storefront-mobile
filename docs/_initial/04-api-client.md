@@ -81,18 +81,25 @@ The NestJS guard verifies these signatures against Apple/Google's public keys. F
 
 Attestation is rate-limited per device (typically once per app launch or per N minutes). Cache the attestation token on-device and reuse it until expiry.
 
-## Device attestation hook (`react-native-app-integrity`)
+## Device attestation hook (custom native module)
 
-We use [`react-native-app-integrity`](https://www.npmjs.com/package/react-native-app-integrity) to obtain platform-signed attestation tokens. It wraps DCAppAttestService (iOS) and Play Integrity (Android) under a single API, ships as a config plugin, and works with EAS Build. **It does NOT run in Expo Go** — you must use a custom dev client (`pnpm expo run:ios` / `run:android` or an EAS dev build) for development.
+Device attestation must be implemented as a **custom Expo native module** (config plugin) that wraps:
+
+- **iOS** — Apple's [`DCAppAttestService`](https://developer.apple.com/documentation/devicecheck/establishing_your_app_s_integrity) (App Attest API)
+- **Android** — Google's [Play Integrity API](https://developer.android.com/google/play/integrity)
+
+There is no off-the-shelf npm package that wraps both under a single React Native API. You need a custom Expo plugin (see `apps/native/app-integrity/` in this repo). The API surface exposed by that module is:
 
 ```ts
 // libs/device-attestation.ts
+// Custom Expo native module — see apps/native/app-integrity/
+// Wraps Apple DCAppAttestService (iOS) and Google Play Integrity (Android).
 import {
   attestKey,
   generateKey,
   isSupported,
   requestIntegrityToken,
-} from 'react-native-app-integrity';
+} from '@/libs/native/app-integrity';
 import * as Application from 'expo-application';
 import { Platform } from 'react-native';
 import { useCallback, useRef } from 'react';
@@ -255,19 +262,19 @@ The mobile gateway pattern (new NestJS controllers) costs one team-day of guard 
 
 ## Request flow summary
 
-```
+```text
 First launch (iOS — one-time key registration):
   Mobile app
-    → generateKey()                              (react-native-app-integrity)
+    → generateKey()                              (custom native module)
     → attestKey(keyId, bundleId)                 (returns DER cert signed by Apple)
-    → POST /fo-mobile/2026-01/me/device-key      { keyId, cert }
+    → POST /2026-01/fo-mobile/me/device-key      { keyId, cert }
     → NestJS stores association; future assertions verified against this key
 
 Every subsequent request:
   Mobile app
     → requestIntegrityToken({ keyId, challenge: nonce })   (iOS App Attest assertion)
     → requestIntegrityToken({ nonce })                     (Android Play Integrity token)
-    → fetch /fo-mobile/2026-01/stores/:storeId/products
+    → fetch /2026-01/fo-mobile/stores/:storeId/products
          headers:
            Authorization: Bearer <clerk_jwt>      (optional, set if signed in)
            x-device-attestation: <attestation>    (always)

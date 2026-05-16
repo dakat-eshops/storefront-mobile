@@ -9,8 +9,8 @@ The mobile payment flow differs fundamentally from the web FO: there is no serve
 | File | Topic |
 | --- | --- |
 | [01-overview.md](01-overview.md) | Payment method support, Vietnamese market context, decision matrix |
-| [02-payment-intent.md](02-payment-intent.md) | Payment intent creation, NestJS endpoint, mobile-gateway flow |
-| [03-native-sdks.md](03-native-sdks.md) | MoMo, ZaloPay, VNPay, VietQR — deep-link + app-switch patterns |
+| 02-payment-intent.md _(not yet written)_ | Payment intent creation, NestJS endpoint, mobile-gateway flow |
+| 03-native-sdks.md _(not yet written)_ | MoMo, ZaloPay, VNPay, VietQR — deep-link + app-switch patterns |
 | [04-mobile-flow.md](04-mobile-flow.md) | **End-to-end mobile payment flow** (read this before checkout) |
 
 ## Quick rules

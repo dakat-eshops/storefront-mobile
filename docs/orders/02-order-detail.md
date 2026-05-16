@@ -12,11 +12,15 @@ The order detail screen shows full information for a single order. It is also th
 
 ```ts
 // features/orders/hooks/use-order.ts
+import { useApiClient } from '@/libs/api-client';
+
 export function useOrder(orderId: string) {
+  const api = useApiClient();
+
   return useQuery({
     queryKey: orderQueryKeys.detail(orderId),
-    queryFn: () =>
-      api.get<Order>(`/fo-mobile/stores/${STORE_ID}/me/orders/${orderId}`),
+    queryFn: ({ signal }) =>
+      api.get<Order>(`/me/orders/${orderId}`, signal),
     enabled: !!orderId,
     staleTime: 1000 * 60,   // 1 minute — status may change
   });

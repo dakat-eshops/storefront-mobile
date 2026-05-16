@@ -6,7 +6,7 @@
 TheAstronaut/projects/e-commerce/
 ├── BO/e-Shops/                       # Next.js BO + NestJS API (apps/api/) + @eshops/db package
 ├── FO/KhanhStore/                    # Next.js FO web (existing)
-└── FO/KhanhStore-mobile/             # ← NEW: Expo React Native app (this integration)
+└── FO/storefront-mobile/             # ← NEW: Expo React Native app (this integration)
 ```
 
 **Why a separate repo:**

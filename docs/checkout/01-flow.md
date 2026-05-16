@@ -85,16 +85,17 @@ export default function PaymentScreen() {
 // features/checkout/hooks/use-place-order.ts
 import { useMutation } from '@tanstack/react-query';
 import { useCheckoutStore } from '../store';
-import { api } from '@/libs/api-client';
+import { useApiClient } from '@/libs/api-client';
 import type { PaymentIntentResult } from '@eshops/api-contracts';
 
 export function usePlaceOrder() {
   const { cartId, shippingAddressId, paymentMethod, reset } = useCheckoutStore();
+  const api = useApiClient();
 
   return useMutation<PaymentIntentResult, ApiError>({
     retry: 0,   // never retry payment mutations — double-submit risk
     mutationFn: () =>
-      api.post<PaymentIntentResult>(`/fo-mobile/stores/${STORE_ID}/checkout/payment-intent`, {
+      api.post<PaymentIntentResult>(`/checkout/payment-intent`, {
         cartId,
         shippingAddressId,
         paymentMethod: paymentMethod?.key,
