@@ -13,50 +13,62 @@ All Supabase Broadcast channels published by the BO NestJS API.
 
 ## Payload schemas
 
+> **Corrected 2026-05-16.** The previous shapes on this page were aspirational and did NOT match what BO emits. The schemas below mirror the BO `RealtimeService` calls in `apps/api/src/modules/admin/inventories/inventories.service.ts` and `price-books.service.ts` byte-for-byte. The FO web canonical mirror is [`FO/KhanhStore/src/libs/realtime/payloads.ts`](../../../../FO/KhanhStore/src/libs/realtime/payloads.ts) — keep these three in lock-step.
+
 ### `inventory_update`
 
 ```ts
 interface InventoryUpdatePayload {
-  productId: string;
-  productSlug: string;
-  itemInventoryId: string;
-  quantity: number;          // new absolute quantity
-  isInStock: boolean;        // true if any variant has quantity > 0
-  totalQuantity: number;     // sum across all variants
+  /** product_items.id (the inventory row that changed) — NOT a product id. */
+  itemId: string;
+  /** Convenience flag derived from newQty > 0. */
+  inStock: boolean;
+  /** Absolute quantity-on-hand on this item after the BO mutation. */
+  newQty: number;
+  /** ISO-8601 timestamp the BO mutation committed. */
+  updatedAt: string;
 }
 ```
+
+> **Mobile note.** BO does NOT emit `productId`. The mobile inventory hook in
+> [`libs/realtime/inventory.ts`](../../libs/realtime/inventory.ts) therefore
+> can only invalidate the products **list** queries on its own. A per-product
+> detail invalidation requires the consuming screen to maintain an
+> `itemId → productId` map (or to use an in-cache patcher, like the FO-web
+> pattern at `FO/KhanhStore/src/features/category/collections/realtime.ts`).
 
 ### `price_update`
 
 ```ts
 interface PriceUpdatePayload {
   productId: string;
-  productSlug: string;
-  itemInventoryId: string;   // the specific variant
+  /** Store-currency minor units (e.g. VND whole; USD cents). */
+  newPrice: number;
+  currency: string;
   priceBookId: string;
-  price: number;             // new price in VND (integer)
-  compareAtPrice?: number;   // original price if on discount
+  effectiveAt: string;
 }
 ```
 
 ### `promotion_activated` / `promotion_deactivated`
 
 ```ts
-interface PromotionPayload {
+interface PromotionEventPayload {
   promotionId: string;
-  title: string;
+  name: string;
   discountType: 'percentage' | 'fixed';
   discountValue: number;
-  applicableProductIds: string[];   // empty = applies to all products in store
+  expiresAt: string | null;
 }
 ```
 
 ### `product_published` / `product_unpublished`
 
 ```ts
-interface CatalogPayload {
+interface CatalogEventPayload {
   productId: string;
-  productSlug: string;
+  slug: string;
+  action: 'published' | 'unpublished';
 }
 ```
 

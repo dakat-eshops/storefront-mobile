@@ -9,7 +9,9 @@ import { CartSyncProvider } from '@/features/cart/components/cart-sync-provider'
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { tokenCache } from '@/libs/clerk-token-cache';
 import { env } from '@/libs/env';
+import { PushRegistrationBootstrap } from '@/libs/push-registration-bootstrap';
 import { persister, queryClient } from '@/libs/query-client';
+import { RealtimeProvider } from '@/libs/realtime/realtime-provider';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -26,21 +28,27 @@ export default function RootLayout() {
           persistOptions={{ persister, buster: env.appVersion }}
         >
           <CartSyncProvider>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-              <Stack>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="product/[id]" options={{ title: '' }} />
-                <Stack.Screen
-                  name="sign-in"
-                  options={{ presentation: 'modal', title: 'Sign in' }}
-                />
-                <Stack.Screen
-                  name="modal"
-                  options={{ presentation: 'modal', title: 'Modal' }}
-                />
-              </Stack>
-              <StatusBar style="auto" />
-            </ThemeProvider>
+            <RealtimeProvider>
+              <PushRegistrationBootstrap>
+                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                  <Stack>
+                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                    <Stack.Screen name="product/[id]" options={{ title: '' }} />
+                    <Stack.Screen name="wishlist" options={{ title: 'Wishlist' }} />
+                    <Stack.Screen name="orders" options={{ title: 'My Orders' }} />
+                    <Stack.Screen
+                      name="sign-in"
+                      options={{ presentation: 'modal', title: 'Sign in' }}
+                    />
+                    <Stack.Screen
+                      name="modal"
+                      options={{ presentation: 'modal', title: 'Modal' }}
+                    />
+                  </Stack>
+                  <StatusBar style="auto" />
+                </ThemeProvider>
+              </PushRegistrationBootstrap>
+            </RealtimeProvider>
           </CartSyncProvider>
         </PersistQueryClientProvider>
       </ClerkLoaded>

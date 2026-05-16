@@ -6,19 +6,28 @@ backend, same Clerk identity, same `@eshops/db` types. Implements the design in
 
 ## Status
 
-Vertical-1 (browse + cart) wired:
+Vertical-2 (browse + cart + wishlist + orders + realtime + push) wired:
 
-- App shell with 4 tabs: Home / Search / Cart / Account
+- App shell with 4 tabs: Home / Search / Cart / Account + stack routes for
+  `product/[id]`, `wishlist`, `orders`, `sign-in`
 - Product list (PLP) + product detail (PDP) via `/fo-mobile/2026-01/.../products`
-- MMKV-backed offline cart with optimistic add / qty / remove
-- Clerk sign-in modal + guest ↔ authed cart sync on sign-in
+- MMKV-backed cart with optimistic add / qty / remove (single source of truth
+  for guest + authed until `/fo-mobile/cart/*` lands in NestJS)
+- MMKV-backed wishlist with heart toggle on PDP + dedicated screen
+- Clerk sign-in modal + sign-out from Account
+- Order history screen (gated on Clerk JWT; BO returns `success: true` empty
+  list until `FoOrdersService` is built)
+- Supabase Broadcast subscribers for `store:{storeId}:inventory`, `:prices`,
+  `:catalog` with `AppState`-aware reconnect and targeted query invalidation
+- Expo push registration on sign-in → POST `/fo-mobile/.../devices/push-token`
 - TanStack Query with MMKV persister (offline-first reads)
 - BO side: `FoMobileModule` with `ClerkMobileGuard` + `DeviceAttestationGuard`,
-  reusing existing FO service classes
+  reusing existing FO service classes; stub controllers for `orders`, `devices`,
+  `me/device-key` until full services land
 
-Not yet wired (next iterations): checkout, orders history, cancel/return flows,
-wishlist, push notifications, Supabase Broadcast subscribers, App Attest /
-Play Integrity verification in `DeviceAttestationGuard`.
+Not yet wired (next iterations): checkout pipeline, cancel/return flows,
+NetInfo offline gate, App Attest / Play Integrity verification in
+`DeviceAttestationGuard`, real `FoOrdersService` + `FoCartService` in NestJS.
 
 ## Auth model — the non-negotiable
 
@@ -50,26 +59,24 @@ app/
   product/[id].tsx             # PDP (Stack route)
   sign-in.tsx                  # Modal sign-in (Clerk Expo)
 features/
-  products/
-    collections/queryKeys.ts   # Source of truth for product query keys
-    hooks/use-products.ts      # useProductList (infinite) + useProductDetail
-    components/product-card.tsx
-    utils/format-price.ts
-    types.ts
-  cart/
-    collections/queryKeys.ts
-    collections/storage.ts     # MMKV guest cart (key: kuden-cart-items)
-    components/cart-sync-provider.tsx
-    hooks/use-cart.ts          # useCart / useAddToCart / useUpdate / useRemove
-    types.ts
+  products/                    # PLP + PDP — queryKeys, hooks, ProductCard, formatPrice
+  cart/                        # MMKV guest cart + sync provider stub
+  wishlist/                    # MMKV-backed wishlist (mirrors cart pattern)
+  orders/                      # Authed order history (BO endpoint is stub)
 libs/
   api-client.ts                # useApiClient → /fo-mobile/<version>/stores/<storeId>
   clerk-token-cache.ts         # SecureStore-backed Clerk session cache
   device-attestation.ts        # App Attest / Play Integrity hook
   env.ts                       # Typed EXPO_PUBLIC_* access
+  push-notifications.ts        # Expo push token + auto-register on sign-in
+  push-registration-bootstrap.tsx
   query-client.ts              # MMKV-persisted TanStack Query client
   supabase.ts                  # Shared Supabase JS client (Broadcast only)
-  realtime/                    # Broadcast subscribers (inventory etc.)
+  realtime/
+    inventory.ts               # store:{storeId}:inventory subscriber
+    prices.ts                  # store:{storeId}:prices subscriber
+    catalog.ts                 # store:{storeId}:catalog subscriber
+    realtime-provider.tsx      # Mounts all three + tears down on sign-out
 ```
 
 ## Dev setup

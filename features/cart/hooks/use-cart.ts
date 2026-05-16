@@ -1,30 +1,33 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@clerk/clerk-expo';
-import { useApiClient } from '@/libs/api-client';
 import { cartQueryKeys } from '../collections/queryKeys';
 import { clearCart, readCart, writeCart } from '../collections/storage';
 import type { CartStorageItem } from '../types';
 
 /**
- * Guest cart (MMKV) and authed cart (NestJS) share one read hook. When the
- * user is signed in, reads + writes proxy to `/fo-mobile/.../cart`. When
- * signed out, MMKV is the source of truth.
+ * MMKV is the source of truth for the cart on mobile today.
  *
- * Sync on sign-in (POST /cart/sync) is handled by `CartSyncProvider`.
+ * The web FO stores guest carts in `localStorage` and syncs to a NestJS
+ * `/cart/*` API on sign-in. Those `/cart/*` endpoints are NOT yet wired in
+ * `apps/api/` (no `FoCartModule` exists). Until they ship, mobile cart
+ * mutations stay 100% local for both guest and authed users — there is no
+ * "/fo-mobile/cart" endpoint to call without 404-ing.
+ *
+ * When the server cart endpoints land:
+ *   1. Switch `useCart` to fetch `/cart` when signed in.
+ *   2. Switch the mutations to call `/cart/items` (etc.) and remove the local
+ *      MMKV writes for authed users.
+ *   3. `CartSyncProvider` will then have a real `/cart/sync` endpoint to hit.
+ *
+ * Until then, signing in does NOT lose the cart — the same MMKV store is
+ * shared across guest + authed states.
+ *
+ * See docs/_initial/05-data-layer.md.
  */
 export function useCart() {
-  const api = useApiClient();
-  const { isSignedIn } = useAuth();
-
   return useQuery({
-    queryKey: cartQueryKeys.detail(isSignedIn ? 'me' : 'guest'),
-    queryFn: async () => {
-      if (isSignedIn) return api.get<CartStorageItem[]>('/cart');
-      return readCart();
-    },
-    // MMKV reads are sync; no need to retry.
-    retry: isSignedIn ? 2 : 0,
-    staleTime: isSignedIn ? 1000 * 60 * 5 : 0,
+    queryKey: cartQueryKeys.detail('guest'),
+    queryFn: async () => readCart(),
+    staleTime: 0,
   });
 }
 
@@ -44,35 +47,19 @@ function upsertLocal(item: CartStorageItem): CartStorageItem[] {
 }
 
 export function useAddToCart() {
-  const api = useApiClient();
   const qc = useQueryClient();
-  const { isSignedIn } = useAuth();
-
   return useMutation({
-    mutationFn: async (item: CartStorageItem) => {
-      if (isSignedIn) {
-        await api.post('/cart/items', item);
-        return null;
-      }
-      return upsertLocal(item);
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: cartQueryKeys.all });
+    mutationFn: async (item: CartStorageItem) => upsertLocal(item),
+    onSuccess: (next) => {
+      qc.setQueryData(cartQueryKeys.detail('guest'), next);
     },
   });
 }
 
 export function useUpdateCartItem() {
-  const api = useApiClient();
   const qc = useQueryClient();
-  const { isSignedIn } = useAuth();
-
   return useMutation({
     mutationFn: async (input: { itemId: string; qty: number }) => {
-      if (isSignedIn) {
-        await api.patch(`/cart/items/${input.itemId}`, { qty: input.qty });
-        return null;
-      }
       const current = readCart();
       const next =
         input.qty <= 0
@@ -83,26 +70,19 @@ export function useUpdateCartItem() {
       writeCart(next);
       return next;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: cartQueryKeys.all }),
+    onSuccess: (next) => qc.setQueryData(cartQueryKeys.detail('guest'), next),
   });
 }
 
 export function useRemoveCartItem() {
-  const api = useApiClient();
   const qc = useQueryClient();
-  const { isSignedIn } = useAuth();
-
   return useMutation({
     mutationFn: async (itemId: string) => {
-      if (isSignedIn) {
-        await api.delete(`/cart/items/${itemId}`);
-        return null;
-      }
       const next = readCart().filter((i) => i.itemId !== itemId);
       writeCart(next);
       return next;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: cartQueryKeys.all }),
+    onSuccess: (next) => qc.setQueryData(cartQueryKeys.detail('guest'), next),
   });
 }
 
@@ -111,8 +91,8 @@ export function useClearCart() {
   return useMutation({
     mutationFn: async () => {
       clearCart();
-      return [];
+      return [] as CartStorageItem[];
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: cartQueryKeys.all }),
+    onSuccess: () => qc.setQueryData(cartQueryKeys.detail('guest'), []),
   });
 }

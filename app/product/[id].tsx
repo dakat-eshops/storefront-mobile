@@ -9,12 +9,19 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAddToCart } from '@/features/cart/hooks/use-cart';
 import { useProductDetail } from '@/features/products/hooks/use-products';
 import { formatPrice } from '@/features/products/utils/format-price';
+import {
+  useIsWishlisted,
+  useToggleWishlist,
+} from '@/features/wishlist/hooks/use-wishlist';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 
 export default function ProductDetailScreen() {
   const scheme = useColorScheme() ?? 'light';
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data, isLoading, isError } = useProductDetail(id);
   const addToCart = useAddToCart();
+  const wishlisted = useIsWishlisted(id);
+  const toggleWishlist = useToggleWishlist();
 
   if (isLoading) {
     return (
@@ -59,26 +66,51 @@ export default function ProductDetailScreen() {
         </View>
       </ScrollView>
       <ThemedView style={styles.footer}>
-        <Pressable
-          accessibilityRole="button"
-          disabled={addToCart.isPending}
-          onPress={() =>
-            addToCart.mutate({
-              itemId: data.id,
-              productId: data.id,
-              name: data.name,
-              imageUrl: imageUrl ?? null,
-              unitPrice: Number(data.salePrice ?? data.basePrice ?? 0),
-              currency: data.currency ?? 'VND',
-              qty: 1,
-            })
-          }
-          style={[styles.cta, { backgroundColor: Colors[scheme].tint }]}
-        >
-          <ThemedText style={styles.ctaText}>
-            {addToCart.isPending ? 'Adding…' : 'Add to cart'}
-          </ThemedText>
-        </Pressable>
+        <View style={styles.footerRow}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              wishlisted ? 'Remove from wishlist' : 'Add to wishlist'
+            }
+            onPress={() =>
+              toggleWishlist.mutate({
+                productId: data.id,
+                slug: data.slug,
+                name: data.name,
+                imageUrl: imageUrl ?? null,
+                unitPrice: Number(data.salePrice ?? data.basePrice ?? 0),
+                currency: data.currency ?? 'VND',
+              })
+            }
+            style={[styles.wishlistBtn, { borderColor: Colors[scheme].tint }]}
+          >
+            <IconSymbol
+              name={wishlisted ? 'heart.fill' : 'heart'}
+              size={22}
+              color={Colors[scheme].tint}
+            />
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            disabled={addToCart.isPending}
+            onPress={() =>
+              addToCart.mutate({
+                itemId: data.id,
+                productId: data.id,
+                name: data.name,
+                imageUrl: imageUrl ?? null,
+                unitPrice: Number(data.salePrice ?? data.basePrice ?? 0),
+                currency: data.currency ?? 'VND',
+                qty: 1,
+              })
+            }
+            style={[styles.cta, { backgroundColor: Colors[scheme].tint }]}
+          >
+            <ThemedText style={styles.ctaText}>
+              {addToCart.isPending ? 'Adding…' : 'Add to cart'}
+            </ThemedText>
+          </Pressable>
+        </View>
       </ThemedView>
     </SafeAreaView>
   );
@@ -99,10 +131,20 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#E5E7EB',
   },
+  footerRow: { flexDirection: 'row', gap: 12, alignItems: 'stretch' },
+  wishlistBtn: {
+    width: 52,
+    borderWidth: 1,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   cta: {
+    flex: 1,
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   ctaText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });
