@@ -1,5 +1,6 @@
 import { useAuth, useUser } from '@clerk/clerk-expo';
-import { Link } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
+import { Link, router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
@@ -7,12 +8,14 @@ import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { supabase } from '@/libs/supabase';
 
 export default function AccountScreen() {
   const scheme = useColorScheme() ?? 'light';
   const { isSignedIn, signOut } = useAuth();
   const { user } = useUser();
   const tint = Colors[scheme].tint;
+  const queryClient = useQueryClient();
 
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
@@ -33,7 +36,12 @@ export default function AccountScreen() {
       <View style={styles.footer}>
         {isSignedIn ? (
           <Pressable
-            onPress={() => signOut()}
+            onPress={async () => {
+              await supabase.removeAllChannels();
+              queryClient.clear();
+              await signOut();
+              router.replace('/sign-in');
+            }}
             style={[styles.cta, styles.outline, { borderColor: tint }]}
           >
             <ThemedText style={[styles.ctaText, { color: tint }]}>Sign out</ThemedText>

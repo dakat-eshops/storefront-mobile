@@ -26,6 +26,7 @@ const MAPPING = {
   'trash': 'delete',
   'heart': 'favorite-border',
   'heart.fill': 'favorite',
+  'checkmark': 'check',
 } as IconMapping;
 
 /**

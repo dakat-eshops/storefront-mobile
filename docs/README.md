@@ -7,14 +7,17 @@ Documentation for the FO React Native app. Organized by phase so each batch of d
 | Folder | Scope |
 | --- | --- |
 | [_initial/](./_initial/README.md) | The initial design set — architecture, setup, auth, API client, data layer, realtime, navigation, push, shared code, build/deploy. Written before/during Vertical-1 (browse + cart). Treat as **historical design intent**, not a live changelog. |
+| [cart/](./cart/README.md) | Shopee-style cart item selection — `useCartSelection` hook, `ThreeStateCheckbox`, sticky bottom bar, Zustand cross-step handoff. |
 | [payments/](./payments/README.md) | Payment method overview and mobile-specific payment flow (VietQR, app-switch, COD). |
 | [checkout/](./checkout/README.md) | Full checkout flow: shipping address, payment selection, review & confirm, post-submission routing. |
 | [orders/](./orders/README.md) | Order history (infinite scroll) and order detail screen, status mapping, deep links, VietQR polling. |
 | [cancel-return/](./cancel-return/README.md) | Cancel and return request flows, mobile architecture (no HMAC), push-based BO pushback, auto-approve. |
+| [loyalty-points/](./loyalty-points/README.md) | Loyalty points on mobile — passive consumer lifecycle, push notification restoration, implementation plan (profile balance, order detail fields, checkout redemption). |
 | [wishlist/](./wishlist/README.md) | TanStack DB wishlist collection — guest (MMKV) + authed (query collection), toggle API, sync provider. |
 | [push-v2/](./push-v2/README.md) | Extended push notification events, typed payload shapes, foreground/background/killed handlers, cold start. |
 | [broadcast/](./broadcast/README.md) | Supabase Broadcast subscriber hooks, `AppState` reconnect, `setQueryData` patch pattern, channel reference. |
 | [security/](./security/README.md) | iOS App Attest, Android Play Integrity, certificate pinning, jailbreak detection, ProGuard, replay protection. |
+| [qr-code/](./qr-code/README.md) | QR code display for customers — `react-native-qrcode-svg`, payload schema (cross-repo SSOT shared with BO scanner), compatibility contract. |
 
 ## Conventions
 
