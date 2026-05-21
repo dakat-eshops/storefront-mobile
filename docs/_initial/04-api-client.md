@@ -6,7 +6,7 @@
 
 The web FO authenticates to NestJS `/fo/*` routes with **two** signals:
 
-1. **`FO_HMAC_SECRET`** — a shared per-store secret. Computes `HMAC-SHA256(timestamp.storeId.body)` into the `x-signature` header. Stored as `stores.fo_api_secret` in Postgres, read by `StoreFoConfigService` on the web FO **server-side only**.
+1. **`BO_WEBHOOK_SECRET`** — a shared per-store secret. Computes `HMAC-SHA256(timestamp.storeId.body)` into the `x-signature` header. Stored as `stores.fo_api_secret` in Postgres, read by `StoreFoConfigService` on the web FO **server-side only**.
 2. **Clerk JWT (optional)** — `Authorization: Bearer <jwt>` for personalized routes.
 
 This works for web because the HMAC secret never leaves the Next.js server. The browser proxies through Next.js API routes, which then sign on the user's behalf.
@@ -16,7 +16,7 @@ This works for web because the HMAC secret never leaves the Next.js server. The 
 - Decompiled by anyone in <5 minutes.
 - Cached in app stores, in user backups, on rooted devices.
 
-If `FO_HMAC_SECRET` ships in the binary, **any user can forge requests for any other user's store** until the secret is rotated — and rotation means force-upgrading every installed copy of the app.
+If `BO_WEBHOOK_SECRET` ships in the binary, **any user can forge requests for any other user's store** until the secret is rotated — and rotation means force-upgrading every installed copy of the app.
 
 ## The solution — `/2026-01/fo-mobile/*` mobile gateway
 
@@ -240,7 +240,7 @@ export function useApiClient() {
 }
 ```
 
-## Why not just put the HMAC secret in `EXPO_PUBLIC_FO_HMAC_SECRET`?
+## Why not just put the HMAC secret in `EXPO_PUBLIC_HMAC_SECRET`?
 
 It will work. It will pass code review the first time. It will ship to the store. And then the first person to run `strings` on your IPA / APK gets the keys to every store. There is no rotation strategy that doesn't brick every installed copy. This is a one-way door — don't open it.
 

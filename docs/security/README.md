@@ -12,7 +12,7 @@ Device attestation and binary hardening for the mobile storefront.
 
 ## Key invariants
 
-1. **No secrets in the binary.** `FO_HMAC_SECRET`, `INTERNAL_API_KEY`, and any BO/NestJS service secrets MUST NOT be bundled. Mobile authenticates via Clerk JWT + device attestation — not shared secrets.
+1. **No secrets in the binary.** `BO_WEBHOOK_SECRET`, `INTERNAL_API_KEY`, and any BO/NestJS service secrets MUST NOT be bundled. Mobile authenticates via Clerk JWT + device attestation — not shared secrets.
 2. **`DeviceAttestationGuard` enforces attestation on sensitive routes.** The guard runs in NestJS and validates the attestation token on every write. Reads may be exempt to reduce latency.
 3. **5-minute token cache.** Generating a new attestation token for every request is too slow. Cache the token in `expo-secure-store` for up to 5 minutes.
 4. **Replay protection.** Attestation requests include a server-issued nonce (fresh per request). Tokens older than 5 minutes are rejected by NestJS.

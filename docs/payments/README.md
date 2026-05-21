@@ -15,7 +15,7 @@ The mobile payment flow differs fundamentally from the web FO: there is no serve
 
 ## Quick rules
 
-1. **Never bundle `FO_HMAC_SECRET` in the binary.** Mobile payment intents are created via `/fo-mobile/` using Clerk JWT + device attestation only.
+1. **Never bundle `BO_WEBHOOK_SECRET` in the binary.** Mobile payment intents are created via `/fo-mobile/` using Clerk JWT + device attestation only.
 2. **COD is always available and MUST be the default.** Vietnamese e-commerce: COD is the most common method; place it first.
 3. **App-switch payments (MoMo, ZaloPay, VNPay) use deep links to return to the app.** Configure `khanhstore://checkout/payment-callback` in the deep-link scheme.
 4. **QR payments (VietQR) show an in-app QR image.** No app-switch; poll for payment status.

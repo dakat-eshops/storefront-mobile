@@ -26,7 +26,7 @@ FO storefront on iOS + Android. Sibling to the Next.js FO web app — same NestJ
 These come straight from the BO + FO `CLAUDE.md` invariants and govern everything:
 
 1. **Auth separation** — Clerk only. Never reuse Supabase auth from BO. Never share a session token between FO web and FO mobile via deep link.
-2. **`FO_HMAC_SECRET` MUST NOT be bundled in the mobile binary.** Mobile bundles are extractable via static analysis. The web FO holds this secret server-side only — mobile cannot replicate that pattern. See [04-api-client.md](04-api-client.md) for the mobile-gateway solution.
+2. **`BO_WEBHOOK_SECRET` MUST NOT be bundled in the mobile binary.** Mobile bundles are extractable via static analysis. The web FO holds this secret server-side only — mobile cannot replicate that pattern. See [04-api-client.md](04-api-client.md) for the mobile-gateway solution.
 3. **One NestJS backend.** Web FO, mobile FO, BO web, BO mobile all hit the same NestJS at `apps/api/`. No mobile-only NestJS instance, no duplicated routes. Mobile auth flows are added to existing controllers, not new ones.
 4. **`/fo/*` is the only path FO mobile may touch.** Admin routes (`/2026-01/...`) are off-limits — the BO gateway and ApiKeyGuard reject them.
 5. **Channel names are an API contract.** `store:{storeId}:{topic}` Supabase Broadcast channels are shared with web. Never rename without coordinating in both repos.

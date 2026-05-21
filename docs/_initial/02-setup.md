@@ -153,7 +153,7 @@ EXPO_PUBLIC_GOOGLE_CLOUD_PROJECT_NUMBER=123456789012   # required by Play Integr
 EXPO_PUBLIC_APP_VERSION=1.0.0                          # used as TanStack Query cache buster on upgrade
 
 # NEVER add these:
-# FO_HMAC_SECRET                       — see 04-api-client.md
+# BO_WEBHOOK_SECRET                       — see 04-api-client.md
 # INTERNAL_API_KEY                     — BO-only secret
 # SUPABASE_SECRET_KEY                  — service role, never in mobile
 # CLERK_SECRET_KEY                     — server-only

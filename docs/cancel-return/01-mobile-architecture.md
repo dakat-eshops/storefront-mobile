@@ -4,7 +4,7 @@
 
 | Concern | Web FO (Next.js) | Mobile (Expo) |
 | --- | --- | --- |
-| Request signing to NestJS | HMAC with `FO_HMAC_SECRET` in server action | Clerk JWT + DeviceAttestation (no HMAC) |
+| Request signing to NestJS | HMAC with `BO_WEBHOOK_SECRET` in server action | Clerk JWT + DeviceAttestation (no HMAC) |
 | Receiving BO decision | BO calls `/api/webhooks/bo/order-status` on the FO server | BO sends push notification; mobile fetches updated order |
 | Auth guard on NestJS `/fo-mobile/` | `ClerkMobileGuard` + `DeviceAttestationGuard` | Same |
 | Cancel/return auto-approve | `CancelReturnPolicyService.shouldAutoApprove()` in NestJS | Same — NestJS handles, mobile just observes result |

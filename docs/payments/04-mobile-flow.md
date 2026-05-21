@@ -4,11 +4,11 @@
 
 ## Why the flow differs from web
 
-The web FO creates payment intents from a Next.js server action, which holds `FO_HMAC_SECRET` server-side and calls NestJS at `/fo/stores/:storeId/checkout/payment-intent` with HMAC + Clerk JWT. Mobile has no server layer — it cannot hold `FO_HMAC_SECRET` safely (binary is extractable). Instead, mobile authenticates via the `/fo-mobile/` gateway with Clerk JWT + device attestation.
+The web FO creates payment intents from a Next.js server action, which holds `BO_WEBHOOK_SECRET` server-side and calls NestJS at `/fo/stores/:storeId/checkout/payment-intent` with HMAC + Clerk JWT. Mobile has no server layer — it cannot hold `BO_WEBHOOK_SECRET` safely (binary is extractable). Instead, mobile authenticates via the `/fo-mobile/` gateway with Clerk JWT + device attestation.
 
 ```text
 Web FO:
-  Browser → Next.js server action (holds FO_HMAC_SECRET) → /fo/ → NestJS
+  Browser → Next.js server action (holds BO_WEBHOOK_SECRET) → /fo/ → NestJS
 
 Mobile:
   App → /fo-mobile/ (Clerk JWT + DeviceAttestation) → NestJS

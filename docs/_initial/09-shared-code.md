@@ -18,7 +18,7 @@ The rule is conservative: share **types and pure logic**, never runtime modules 
 | Anti-pattern | Why |
 | --- | --- |
 | `@eshops/db` runtime entrypoint | Drizzle execute paths require `node:`, `pg`. Will crash Metro at bundle time (or worse, ship a 4MB shim). |
-| `src/libs/server-api-client.ts` (FO web) | Imports `next/headers`, `'server-only'`. Holds `FO_HMAC_SECRET`. |
+| `src/libs/server-api-client.ts` (FO web) | Imports `next/headers`, `'server-only'`. Holds `BO_WEBHOOK_SECRET`. |
 | `src/features/[entity]/server/queries/` | `'use cache'` is Next.js-only. Has no meaning in RN. |
 | `src/features/[entity]/server/actions/` | `'use server'` is Next.js-only. |
 | React components (web → mobile) | DOM ≠ RN. `<div>` is `<View>`, `<img>` is `<Image>`, no CSS classes. Component code does NOT survive the port. |

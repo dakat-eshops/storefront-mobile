@@ -27,7 +27,7 @@ TheAstronaut/projects/e-commerce/
 
 - The Next.js `src/` tree. No `'use server'`, no `'use cache'`, no `next/image`, no `@/libs/server-api-client`.
 - Tailwind classes. RN uses StyleSheet / NativeWind (Tailwind-for-RN, optional). Components are rebuilt for native.
-- The `INTERNAL_API_KEY` and `FO_HMAC_SECRET` — see [04-api-client.md](04-api-client.md).
+- The `INTERNAL_API_KEY` and `BO_WEBHOOK_SECRET` — see [04-api-client.md](04-api-client.md).
 
 ## Layered architecture (mobile)
 

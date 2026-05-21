@@ -4,7 +4,7 @@ Pre-launch and ongoing security checklist for the mobile storefront.
 
 ## Secret hygiene
 
-- **Never bundle server secrets in the binary.** `FO_HMAC_SECRET`, `INTERNAL_API_KEY`, `ELECTRIC_SECRET`, Supabase service role key, and any BO/NestJS service secrets MUST NOT appear in `app.json`, `eas.json`, or any client-side env file.
+- **Never bundle server secrets in the binary.** `BO_WEBHOOK_SECRET`, `INTERNAL_API_KEY`, `ELECTRIC_SECRET`, Supabase service role key, and any BO/NestJS service secrets MUST NOT appear in `app.json`, `eas.json`, or any client-side env file.
 - Use `EXPO_PUBLIC_*` only for truly public values (API base URL, Supabase anon key, store ID). Treat anything prefixed `EXPO_PUBLIC_` as readable by anyone with the APK/IPA.
 - `expo-secure-store` for Clerk session tokens and device key IDs. Never AsyncStorage for sensitive values.
 - Rotate Clerk secret keys and Supabase anon keys independently of mobile release cycles — the app reads them from `EXPO_PUBLIC_*` at build time.

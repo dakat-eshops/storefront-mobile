@@ -110,7 +110,7 @@ can hit `/fo-mobile/*` from a simulator. In production it rejects.
 
 ## Hard rules (from `docs/_initial/README.md` § Non-negotiables)
 
-1. **Never bundle `FO_HMAC_SECRET`.** Mobile talks to `/fo-mobile/*`, never `/fo/*`.
+1. **Never bundle `BO_WEBHOOK_SECRET`.** Mobile talks to `/fo-mobile/*`, never `/fo/*`.
 2. **One NestJS backend** — `/fo-mobile/*` reuses the existing `FoXxxService`
    classes; new controllers are guards-only.
 3. **Channel names are an API contract** — Supabase Broadcast topics

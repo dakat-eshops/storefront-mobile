@@ -14,7 +14,7 @@ COD MUST be the default selected method and MUST appear first in the list. This 
 
 ## Mobile-specific constraints
 
-- **No HMAC secret in binary.** The web FO uses `FO_HMAC_SECRET` in a Next.js server action. Mobile cannot do this. All payment creation goes through the `/fo-mobile/` gateway authenticated by Clerk JWT + device attestation. See [04-mobile-flow.md](04-mobile-flow.md).
+- **No HMAC secret in binary.** The web FO uses `BO_WEBHOOK_SECRET` in a Next.js server action. Mobile cannot do this. All payment creation goes through the `/fo-mobile/` gateway authenticated by Clerk JWT + device attestation. See [04-mobile-flow.md](04-mobile-flow.md).
 - **App-switch for wallets.** MoMo, ZaloPay, and VNPay require opening the external app. The mobile app must handle foreground resume and check order payment status on return.
 - **QR-only fallback.** For users without a wallet app installed, offer VietQR as a fallback — any Vietnamese banking app can scan it.
 
