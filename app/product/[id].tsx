@@ -4,8 +4,9 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { RichTextContent } from '@/components/ui/rich-text-content';
 import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAddToCart } from '@/features/cart/hooks/use-cart';
 import { useProductDetail } from '@/features/products/hooks/use-products';
 import { formatPrice } from '@/features/products/utils/format-price';
@@ -13,7 +14,7 @@ import {
   useIsWishlisted,
   useToggleWishlist,
 } from '@/features/wishlist/hooks/use-wishlist';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function ProductDetailScreen() {
   const scheme = useColorScheme() ?? 'light';
@@ -62,6 +63,9 @@ export default function ProductDetailScreen() {
           </ThemedText>
           {data.description ? (
             <ThemedText style={styles.description}>{data.description}</ThemedText>
+          ) : null}
+          {data.details ? (
+            <RichTextContent html={data.details} />
           ) : null}
         </View>
       </ScrollView>
