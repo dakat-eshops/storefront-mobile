@@ -6,30 +6,21 @@ import { productQueryKeys } from '@/features/products/collections/queryKeys';
 import { supabase } from '../supabase';
 
 /**
- * `store:{storeId}:inventory` / event `inventory_update`.
+ * `store:{storeId}:inventory` — events OUT_OF_STOCK | LOW_STOCK | STOCK_UPDATE.
  *
  * Wire contract (BO is source of truth — see
  * `BO/e-Shops/apps/api/src/modules/admin/inventories/inventories.service.ts`
- * and `BO/e-Shops/docs/features/supabase/BROADCAST_FANOUT_GUIDE.md`):
+ * and `BO/e-Shops/docs/feature-inventory/03-realtime-channels.md`):
  *
  *   { itemId: string;       // product_items.id (the inventory row that changed)
  *     inStock: boolean;     // derived from newQty > 0
  *     newQty: number;       // absolute quantity after the mutation
  *     updatedAt: string }   // ISO-8601 commit timestamp
  *
- * The BO does NOT emit `productId` — this hook therefore cannot directly
- * invalidate a per-product detail entry. Two consequences:
- *
- *   1. We invalidate the products list (PLP badges, homepage tiles) on every
- *      event. The lists carry `isInStock`, so this is the cheapest correct fix.
- *   2. PDP refresh on a single item must be done by the screen subscribing
- *      separately (e.g. via a per-screen `useInventoryBroadcast` extension
- *      that knows its own `itemId → productId` mapping) OR by an in-cache
- *      patcher (see FO web: `src/features/category/collections/realtime.ts`).
- *
- * Audit history: prior version typed `payload as { productId, variantId,
- * branchId, inStock, qty }` and early-returned on `!p.productId`. Because
- * BO never sends `productId`, every event silently no-op'd. Fixed 2026-05-16.
+ * All three event names carry the same payload shape. The BO does NOT emit
+ * `productId`, so this hook cannot target a single detail entry — it invalidates
+ * the products list so PLP badges and homepage tiles re-render with fresh stock.
+ * For per-product PDP patching see FO web: `features/category/collections/realtime.ts`.
  */
 type InventoryUpdatePayload = {
   itemId: string;
@@ -38,6 +29,14 @@ type InventoryUpdatePayload = {
   updatedAt: string;
 };
 
+type InventoryEventName = 'OUT_OF_STOCK' | 'LOW_STOCK' | 'STOCK_UPDATE';
+
+const INVENTORY_EVENTS: InventoryEventName[] = [
+  'OUT_OF_STOCK',
+  'LOW_STOCK',
+  'STOCK_UPDATE',
+];
+
 export function useInventoryBroadcast(storeId: string | undefined) {
   const qc = useQueryClient();
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -45,17 +44,20 @@ export function useInventoryBroadcast(storeId: string | undefined) {
   useEffect(() => {
     if (!storeId) return;
 
-    const ch = supabase
-      .channel(`store:${storeId}:inventory`)
-      .on('broadcast', { event: 'inventory_update' }, ({ payload }) => {
-        const p = payload as InventoryUpdatePayload;
-        if (!p?.itemId) return;
-        // PLP rows carry `isInStock` — invalidate lists so the badge re-renders.
-        // We can't target a single product detail entry without an
-        // `itemId → productId` mapping; defer that to per-screen subscribers.
-        qc.invalidateQueries({ queryKey: productQueryKeys.lists() });
-      })
-      .subscribe();
+    const handlePayload = ({ payload }: { payload: unknown }) => {
+      const p = payload as InventoryUpdatePayload;
+      if (!p?.itemId) return;
+      // PLP rows carry `isInStock` — invalidate lists so the badge re-renders.
+      // We can't target a single product detail entry without an
+      // `itemId → productId` mapping; defer that to per-screen subscribers.
+      qc.invalidateQueries({ queryKey: productQueryKeys.lists() });
+    };
+
+    const base = supabase.channel(`store:${storeId}:inventory`);
+    for (const evt of INVENTORY_EVENTS) {
+      base.on('broadcast', { event: evt }, handlePayload);
+    }
+    const ch = base.subscribe();
 
     channelRef.current = ch;
 
