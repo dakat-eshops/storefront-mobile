@@ -19,5 +19,5 @@ Wishlist collection pattern for mobile.
 
 ## Cross-references
 
-- Cart pattern (reference implementation): [../_initial/05-tanstack-query.md](../_initial/05-tanstack-query.md)
-- FO web wishlist for structural reference: [FO/KhanhStore/docs/wishlist/01-architecture.md](../../../../FO/KhanhStore/docs/wishlist/01-architecture.md)
+- Cart pattern (reference implementation): [../_initial/05-data-layer.md](../_initial/05-data-layer.md)
+- FO web wishlist for structural reference: [FO/KhanhStore/docs/wishlist_feature/01-architecture.md](../../../../FO/KhanhStore/docs/wishlist_feature/01-architecture.md)

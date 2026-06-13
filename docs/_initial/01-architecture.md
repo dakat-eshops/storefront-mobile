@@ -41,7 +41,7 @@ TheAstronaut/projects/e-commerce/
 │  │  ├─ search.tsx                                             │
 │  │  ├─ cart.tsx                                               │
 │  │  └─ account.tsx                                            │
-│  ├─ products/[slug].tsx                                       │
+│  ├─ product/[id].tsx                                          │
 │  └─ checkout/                                                 │
 │                                                                │
 │  features/[entity]/            ← mirrors web FO feature dirs  │

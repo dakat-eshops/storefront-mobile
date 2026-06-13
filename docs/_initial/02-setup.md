@@ -69,7 +69,7 @@ storefront-mobile/
 │   │   ├── search.tsx
 │   │   ├── cart.tsx
 │   │   └── account.tsx
-│   ├── products/[slug].tsx
+│   ├── product/[id].tsx
 │   ├── catalogs/[catalogSlug]/index.tsx
 │   ├── checkout/
 │   │   ├── shipping.tsx

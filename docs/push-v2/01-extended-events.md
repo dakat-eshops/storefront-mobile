@@ -12,7 +12,7 @@ This document covers all push notification event types beyond basic token regist
 | `order_cancelled` | Cancel auto-approved or manually approved | `khanhstore://orders/:orderId` |
 | `cancel_status_update` | Cancel request reviewed | `khanhstore://orders/:orderId` |
 | `return_status_update` | Return request reviewed or refund issued | `khanhstore://orders/:orderId` |
-| `low_stock_alert` | Product in wishlist goes low stock | `khanhstore://products/:slug` |
+| `low_stock_alert` | Product in wishlist goes low stock | `khanhstore://product/:slug` |
 | `promotion_started` | New promotion relevant to user's past purchases | `khanhstore://` (home) |
 
 ## Payload shapes

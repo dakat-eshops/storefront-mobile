@@ -1,6 +1,6 @@
 # Push Notifications v2 — Extended Events
 
-Order lifecycle and cancel/return push notifications (beyond the basic token registration covered in `_initial/06-push-notifications.md`).
+Order lifecycle and cancel/return push notifications (beyond the basic token registration covered in `_initial/08-push-notifications.md`).
 
 ## Documents
 
@@ -19,6 +19,6 @@ Order lifecycle and cancel/return push notifications (beyond the basic token reg
 
 ## Cross-references
 
-- [../_initial/06-push-notifications.md](../_initial/06-push-notifications.md) — Token registration basics
+- [../_initial/08-push-notifications.md](../_initial/08-push-notifications.md) — Token registration basics
 - [../cancel-return/04-status-updates.md](../cancel-return/04-status-updates.md) — Cancel/return notification handling
 - [../orders/02-order-detail.md](../orders/02-order-detail.md) — Deep link destination

@@ -4,9 +4,9 @@ Expo Router (file-based, same mental model as Next.js App Router). Universal lin
 
 ## Routing
 
-Expo Router maps `app/products/[slug].tsx` to the route `/products/:slug`, matching the web FO's `app/products/[slug]/page.tsx`. Keep route shapes identical to web — it eliminates a class of cross-team bugs and unlocks Branch / Sendinblue / generic email campaigns that work for both surfaces.
+Expo Router maps `app/product/[id].tsx` to the route `/product/:slug`. **The `[id]` segment name is a misnomer — the value passed is the product `slug`** (navigation uses `product.slug ?? product.id`, and `useProductDetail` calls `/products/:slugOrId`, which the API resolves by either). The web FO equivalent is `app/(marketing)/products/[productSlug]/page.tsx` (route `/products/:productSlug`). **Both surfaces key the PDP by slug** — they differ only in the path prefix (mobile `/product/`, web `/products/`). A shared campaign/universal link therefore needs only a prefix rewrite, not an identifier lookup.
 
-```
+```text
 app/
 ├── _layout.tsx
 ├── (auth)/
@@ -19,8 +19,8 @@ app/
 │   ├── search.tsx               → /search
 │   ├── cart.tsx                 → /cart
 │   └── account.tsx              → /account
-├── products/
-│   └── [slug].tsx               → /products/:slug
+├── product/
+│   └── [id].tsx                 → /product/:slug   (segment named [id], carries the slug)
 ├── catalogs/[catalogSlug]/
 │   ├── index.tsx                → /catalogs/:catalogSlug
 │   └── categories/[categorySlug].tsx
@@ -76,18 +76,19 @@ When the FO web detects a mobile user-agent on a product page, show a "Open in a
 
 ## Handling deep links in mobile
 
-Expo Router parses deep links automatically when the URL shape matches the file-based routes. For state that can't be inferred from the URL (e.g., "open product `abc` AND prefill quantity 3"), use query params:
+Expo Router parses deep links automatically when the URL shape matches the file-based routes. For state that can't be inferred from the URL (e.g., "open product `blue-cotton-shirt` AND prefill quantity 3"), use query params:
 
-```
-khanhstore://products/abc?qty=3
+```text
+khanhstore://product/blue-cotton-shirt?qty=3
 ```
 
-Then in `app/products/[slug].tsx`:
+Then in `app/product/[id].tsx` (the `id` param holds the product **slug** — NestJS resolves slug→id server-side):
 
 ```tsx
 import { useLocalSearchParams } from 'expo-router';
 
-const { slug, qty } = useLocalSearchParams<{ slug: string; qty?: string }>();
+// `id` is the route segment name; the value is the product slug
+const { id: slug, qty } = useLocalSearchParams<{ id: string; qty?: string }>();
 ```
 
 ## Auth-gated deep links
@@ -129,4 +130,4 @@ See [08-push-notifications.md](08-push-notifications.md) for the full push flow.
 
 - ❌ Adding a `?token=...` param to a deep link to log a user in. Tokens in URLs are logged by every intermediate system (email, browser history, OS logs). Use Clerk session and explicit sign-in.
 - ❌ Routing on `useEffect(() => router.push(...))` based on async state without a guard. Causes redirect loops on cold start.
-- ❌ Diverging route shapes from web. If web has `/products/[slug]`, mobile must too.
+- ❌ Assuming the product path is identical across surfaces. Both key the PDP by **slug**, but the prefix differs — mobile `/product/:slug`, web `/products/:productSlug`. A shared campaign/universal link needs a prefix rewrite (`/products/` ↔ `/product/`); the slug itself carries straight through, and NestJS resolves slug→id on both sides.
