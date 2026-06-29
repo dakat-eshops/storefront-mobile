@@ -9,32 +9,43 @@ import { supabase } from '../supabase';
  * `store:{storeId}:prices` / event `price_update`.
  *
  * Wire contract (BO is source of truth — see
- * `BO/e-Shops/apps/api/src/modules/admin/price-books/price-books.service.ts`):
+ * `BO/e-Shops/apps/api/src/modules/admin/price-books/price-books.service.ts`
+ * → `broadcastPriceIfEnabled` and `BROADCAST_FANOUT_GUIDE §5`):
  *
  *   { priceBookId: string;
- *     name: string;          // price-book name
+ *     name: string;                  // price-book name
  *     currency: string;
- *     effectiveAt: string }  // ISO-8601
+ *     effectiveAt: string;           // ISO-8601
+ *     affectedProductIds: string[];  // products whose item_price_books row changed
+ *     affectedVariationIds: string[] // variations whose row changed
+ *   }
  *
- * **BO does NOT emit `productId(s)` or `newPrice`** — the event signals
- * "a price book mutated", not "product X is now priced Y". Per-product
- * detail invalidation is impossible from this payload alone (we'd need an
- * `itemPriceBooks` lookup the mobile client doesn't cache).
+ * The payload does NOT carry the new price value — BO enumerates the affected
+ * IDs, not prices. Mobile must refetch to surface the new price. Both arrays
+ * are empty when only book metadata changed (name/currency/dates) — in that
+ * case nothing customer-facing changed, so we skip cache work entirely.
  *
- * Mobile policy: invalidate the products list only — the affected products
- * will refetch their (now-stale) prices on next render. PDP screens that
- * need true real-time price reactivity should subscribe separately and
- * refetch on every event regardless of priceBookId.
+ * Mobile policy:
+ *   - Invalidate the products list so PLP/homepage tiles refetch fresh prices.
+ *   - Surgically invalidate each affected product's detail query (best-effort:
+ *     PDP detail is keyed by slug-or-id, so a UUID hit only lands on PDPs keyed
+ *     by id; the list invalidation is the reliable path). Variation-level
+ *     changes fall back to the list refetch (mobile caches no variation→product
+ *     map).
  *
- * Audit history: prior version typed `payload as { productIds?: string[],
- * priceBookId? }` and looped over `p.productIds`. BO never emits that field,
- * so the per-product invalidation was dead code. Fixed 2026-05-16.
+ * Audit history: the 2026-05-16 version dropped per-product handling because BO
+ * did not emit product ids at that time. BO has since added
+ * `affectedProductIds` + `affectedVariationIds` (the FO web `usePricesRealtime`
+ * already consumes them), so this hook now honours them — and stops blindly
+ * invalidating on metadata-only book edits.
  */
 type PriceUpdatePayload = {
   priceBookId: string;
   name: string;
   currency: string;
   effectiveAt: string;
+  affectedProductIds: string[];
+  affectedVariationIds: string[];
 };
 
 export function usePricesBroadcast(storeId: string | undefined) {
@@ -49,9 +60,19 @@ export function usePricesBroadcast(storeId: string | undefined) {
       .on('broadcast', { event: 'price_update' }, ({ payload }) => {
         const p = payload as PriceUpdatePayload;
         if (!p?.priceBookId) return;
-        // Cannot target individual products — BO doesn't tell us which.
-        // Invalidating the lists triggers a refetch that surfaces new prices.
+
+        const productIds = p.affectedProductIds ?? [];
+        const variationIds = p.affectedVariationIds ?? [];
+        // Metadata-only book change (name/currency/dates) → no product prices
+        // moved → nothing to refetch.
+        if (productIds.length === 0 && variationIds.length === 0) return;
+
+        // Reliable path: lists refetch so PLP/homepage tiles surface new prices.
         qc.invalidateQueries({ queryKey: productQueryKeys.lists() });
+        // Best-effort surgical: bust each affected product's detail query.
+        for (const productId of productIds) {
+          qc.invalidateQueries({ queryKey: productQueryKeys.detail(productId) });
+        }
       })
       .subscribe();
 

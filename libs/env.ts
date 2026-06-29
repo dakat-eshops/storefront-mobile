@@ -11,6 +11,8 @@ export const env = {
   supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!,
   googleCloudProjectNumber: process.env.EXPO_PUBLIC_GOOGLE_CLOUD_PROJECT_NUMBER,
   appVersion: process.env.EXPO_PUBLIC_APP_VERSION ?? '1.0.0',
+  /** FO web origin (e.g. https://store.example.com). Used to build QR deep-links on the product screen. */
+  foWebUrl: process.env.EXPO_PUBLIC_FO_WEB_URL ?? '',
 } as const;
 
 if (__DEV__) {

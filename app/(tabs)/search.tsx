@@ -1,5 +1,7 @@
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, StyleSheet, TextInput, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -36,6 +38,15 @@ export default function SearchScreen() {
           autoCapitalize="none"
           autoCorrect={false}
         />
+        <Pressable
+          style={[styles.scanBtn, { borderColor: Colors[scheme].icon }]}
+          onPress={() => router.push('/scan')}
+          accessibilityLabel="Scan barcode"
+          accessibilityRole="button"
+          hitSlop={8}
+        >
+          <Ionicons name="barcode-outline" size={24} color={Colors[scheme].text} />
+        </Pressable>
       </ThemedView>
       <FlatList
         data={items}
@@ -63,13 +74,29 @@ export default function SearchScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
   input: {
+    flex: 1,
     borderWidth: StyleSheet.hairlineWidth,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 16,
+  },
+  scanBtn: {
+    width: 44,
+    height: 44,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   list: { paddingHorizontal: 8, paddingBottom: 24 },
   empty: { padding: 48, alignItems: 'center' },

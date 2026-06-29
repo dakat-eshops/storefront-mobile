@@ -31,11 +31,15 @@ export type ProductListItem = {
 
 export type ProductDetail = ProductListItem & {
   images?: ProductImage[];
+  /** GTIN / EAN-13 / UPC-A / Code128 barcode. Null when not set. Use variation.barcode when a specific variation is selected. */
+  barcode?: string | null;
   variations?: Array<{
     id: string;
     name: string;
     isDefault?: boolean;
     isInStock?: boolean;
+    /** Per-variation barcode. Takes precedence over product-level barcode per variation-precedence rule. */
+    barcode?: string | null;
   }>;
 };
 

@@ -55,3 +55,20 @@ export function useProductDetail(slugOrId: string | undefined) {
     enabled: !!slugOrId,
   });
 }
+
+export type BarcodeResolveResult = {
+  productId: string;
+  number: number;
+  slug: string;
+  variationId?: string;
+};
+
+/**
+ * One-shot barcode → product resolution for the scan screen.
+ * Throws `ApiError` on network failure or when no product matches (NestJS returns success=false).
+ */
+export function useResolveBarcode() {
+  const api = useApiClient();
+  return (barcode: string): Promise<BarcodeResolveResult> =>
+    api.get<BarcodeResolveResult>(`/products/resolve-barcode/${encodeURIComponent(barcode)}`);
+}

@@ -8,8 +8,10 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { RichTextContent } from '@/components/ui/rich-text-content';
 import { Colors } from '@/constants/theme';
 import { useAddToCart } from '@/features/cart/hooks/use-cart';
+import { ProductBarcode } from '@/features/products/components/product-barcode';
 import { useProductDetail } from '@/features/products/hooks/use-products';
 import { formatPrice } from '@/features/products/utils/format-price';
+import { env } from '@/libs/env';
 import {
   useIsWishlisted,
   useToggleWishlist,
@@ -67,6 +69,13 @@ export default function ProductDetailScreen() {
           {data.details ? (
             <RichTextContent html={data.details} />
           ) : null}
+          {/* Barcode + QR — variation-aware: default variation wins, product-level as fallback */}
+          {(data.variations?.find((v) => v.isDefault)?.barcode ?? data.barcode) && (
+            <ProductBarcode
+              barcode={data.variations?.find((v) => v.isDefault)?.barcode ?? data.barcode}
+              pdpUrl={`${env.foWebUrl}/products/${data.slug}`}
+            />
+          )}
         </View>
       </ScrollView>
       <ThemedView style={styles.footer}>
