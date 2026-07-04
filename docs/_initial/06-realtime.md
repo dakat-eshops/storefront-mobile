@@ -34,59 +34,45 @@ We disable Supabase Auth persistence because **Clerk is the identity system**. S
 ## Subscriber hook (per channel)
 
 ```ts
-// libs/realtime/inventory.ts
+// libs/realtime/inventory.ts (simplified — see the file for the real payload)
 import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { AppState } from 'react-native';
 import { supabase } from '@/libs/supabase';
 import { productQueryKeys } from '@/features/products/collections/queryKeys';
-import { inventoryQueryKeys } from '@/features/inventory/collections/queryKeys';
+import { useAppActiveGate } from './use-app-active';
 
-type InventoryUpdatePayload = {
-  productId: string;
-  productSlug: string;
-  itemInventoryId: string;
-  quantity: number;       // new absolute quantity for this item inventory
-  isInStock: boolean;     // true if any variant has quantity > 0
-  totalQuantity: number;  // sum across all variants
-};
-
-export function useInventoryBroadcast(storeId: string) {
+export function useInventoryBroadcast(storeId: string | undefined) {
   const qc = useQueryClient();
-  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  // Connection budget: true while foregrounded; flips false ~3s after
+  // backgrounding, which tears the channel down via the effect cleanup.
+  const appActive = useAppActiveGate();
+  const hadSubscribedRef = useRef(false);
 
   useEffect(() => {
-    if (!storeId) return;
+    if (!(storeId && appActive)) return;
+
+    if (hadSubscribedRef.current) {
+      // Rejoin after teardown — Broadcast is best-effort, so reconcile
+      // whatever was missed while backgrounded.
+      qc.invalidateQueries({ queryKey: productQueryKeys.lists() });
+    }
 
     const ch = supabase
       .channel(`store:${storeId}:inventory`)
-      .on('broadcast', { event: 'inventory_update' }, ({ payload }) => {
-        const p = payload as InventoryUpdatePayload;
-        // Targeted invalidation — never blanket-invalidate
-        qc.invalidateQueries({ queryKey: productQueryKeys.detail(p.productId) });
-        qc.invalidateQueries({ queryKey: inventoryQueryKeys.byProduct(p.productId) });
+      .on('broadcast', { event: 'STOCK_UPDATE' }, ({ payload }) => {
+        qc.invalidateQueries({ queryKey: productQueryKeys.lists() });
       })
       .subscribe();
-
-    channelRef.current = ch;
-
-    // Reconnect on foreground — RN suspends WebSockets in background
-    const sub = AppState.addEventListener('change', (state) => {
-      if (state === 'active' && channelRef.current?.state !== 'joined') {
-        channelRef.current?.subscribe();
-      }
-    });
+    hadSubscribedRef.current = true;
 
     return () => {
-      sub.remove();
       supabase.removeChannel(ch);
-      channelRef.current = null;
     };
-  }, [storeId, qc]);
+  }, [storeId, appActive, qc]);
 }
 ```
 
-Mount in a top-level provider that only runs when the user is on a store-scoped screen.
+Mount in a top-level provider that only runs when the user is on a store-scoped screen. The shared gate lives in [`libs/realtime/use-app-active.ts`](../../libs/realtime/use-app-active.ts) — every subscriber hook must compose it; never hold a channel open while the app is backgrounded.
 
 ## Channels (mirrors web FO)
 
@@ -107,10 +93,11 @@ Mobile is a FO surface — same rule. If a server-side change to a Broadcast pay
 
 ## Lifecycle rules
 
-- **App backgrounded for >30s** → iOS closes the WebSocket. Always re-subscribe on `AppState === 'active'`.
+- **Connection budget (app background)** → `useAppActiveGate` flips `false` ~3s (`APP_ACTIVE_GRACE_MS`) after the app leaves `active`; every subscriber effect tears its channel down then. Supabase bills on **peak concurrent connections** — a backgrounded app must not hold one. Don't rely on the OS killing the socket (~30s on iOS); teardown is explicit and immediate server-side.
+- **App foregrounded** → the gate flips `true`, the effects re-run, channels rejoin, and each hook invalidates the products list once to reconcile events missed while torn down (Broadcast is best-effort; there is no replay).
 - **Network change (Wi-Fi ↔ cellular)** → Supabase client auto-reconnects with backoff. Don't intervene.
 - **Sign-out** → Tear down all channels (`supabase.removeAllChannels()`) before clearing the Clerk session so the next user doesn't receive events scoped to the previous user's profile (e.g., personalized promotions, if those ever ship).
-- **Multiple channels** → Subscribe to all four at app start (inventory, prices, promotions, catalog). The cost is one WebSocket multiplexing all topics, not four.
+- **Multiple channels** → Subscribe to all topics while foregrounded (inventory, prices, catalog). The cost is one WebSocket multiplexing all topics, not one per topic.
 
 ## Feature flags gate emission, not subscription
 

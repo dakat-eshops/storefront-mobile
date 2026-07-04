@@ -18,6 +18,7 @@ Documentation for the FO React Native app. Organized by phase so each batch of d
 | [broadcast/](./broadcast/README.md) | Supabase Broadcast subscriber hooks, `AppState` reconnect, `setQueryData` patch pattern, channel reference. |
 | [security/](./security/README.md) | iOS App Attest, Android Play Integrity, certificate pinning, jailbreak detection, ProGuard, replay protection. |
 | [qr-code/](./qr-code/README.md) | QR code display for customers — `react-native-qrcode-svg`, payload schema (cross-repo SSOT shared with BO scanner), compatibility contract. |
+| [scale-to-1m/](./scale-to-1m/README.md) | Pending RN items from the BO Scale-to-1M program — conditional requests (ETag/304) + `staleTime` adoption (BO task 9.4, deferred) and the `useAppActiveGate` simulator spot-check (BO task 11.6). |
 
 ## Conventions
 

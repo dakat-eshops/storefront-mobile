@@ -1,9 +1,8 @@
-import type { RealtimeChannel } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
-import { AppState } from 'react-native';
 import { productQueryKeys } from '@/features/products/collections/queryKeys';
 import { supabase } from '../supabase';
+import { useAppActiveGate } from './use-app-active';
 
 /**
  * `store:{storeId}:inventory` — events OUT_OF_STOCK | LOW_STOCK | STOCK_UPDATE.
@@ -39,10 +38,20 @@ const INVENTORY_EVENTS: InventoryEventName[] = [
 
 export function useInventoryBroadcast(storeId: string | undefined) {
   const qc = useQueryClient();
-  const channelRef = useRef<RealtimeChannel | null>(null);
+  // Connection budget: subscribe only while foregrounded — the gate tears the
+  // channel down shortly after backgrounding and re-runs this effect on resume.
+  const appActive = useAppActiveGate();
+  // True once we have subscribed at least once → a later effect run is a
+  // REJOIN (events were missed while torn down) and must reconcile.
+  const hadSubscribedRef = useRef(false);
 
   useEffect(() => {
-    if (!storeId) return;
+    if (!(storeId && appActive)) return;
+
+    if (hadSubscribedRef.current) {
+      // Broadcast is best-effort: anything emitted while backgrounded is gone.
+      qc.invalidateQueries({ queryKey: productQueryKeys.lists() });
+    }
 
     const handlePayload = ({ payload }: { payload: unknown }) => {
       const p = payload as InventoryUpdatePayload;
@@ -58,19 +67,10 @@ export function useInventoryBroadcast(storeId: string | undefined) {
       base.on('broadcast', { event: evt }, handlePayload);
     }
     const ch = base.subscribe();
-
-    channelRef.current = ch;
-
-    const sub = AppState.addEventListener('change', (state) => {
-      if (state === 'active' && channelRef.current?.state !== 'joined') {
-        channelRef.current?.subscribe();
-      }
-    });
+    hadSubscribedRef.current = true;
 
     return () => {
-      sub.remove();
       supabase.removeChannel(ch);
-      channelRef.current = null;
     };
-  }, [storeId, qc]);
+  }, [storeId, appActive, qc]);
 }

@@ -1,9 +1,8 @@
-import type { RealtimeChannel } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
-import { AppState } from 'react-native';
 import { productQueryKeys } from '@/features/products/collections/queryKeys';
 import { supabase } from '../supabase';
+import { useAppActiveGate } from './use-app-active';
 
 /**
  * `store:{storeId}:prices` / event `price_update`.
@@ -50,10 +49,21 @@ type PriceUpdatePayload = {
 
 export function usePricesBroadcast(storeId: string | undefined) {
   const qc = useQueryClient();
-  const channelRef = useRef<RealtimeChannel | null>(null);
+  // Connection budget: subscribe only while foregrounded — the gate tears the
+  // channel down shortly after backgrounding and re-runs this effect on resume.
+  const appActive = useAppActiveGate();
+  // True once we have subscribed at least once → a later effect run is a
+  // REJOIN (events were missed while torn down) and must reconcile.
+  const hadSubscribedRef = useRef(false);
 
   useEffect(() => {
-    if (!storeId) return;
+    if (!(storeId && appActive)) return;
+
+    if (hadSubscribedRef.current) {
+      // Broadcast is best-effort: price updates emitted while backgrounded are
+      // gone, and we don't know which products they touched — refetch lists.
+      qc.invalidateQueries({ queryKey: productQueryKeys.lists() });
+    }
 
     const ch = supabase
       .channel(`store:${storeId}:prices`)
@@ -71,23 +81,17 @@ export function usePricesBroadcast(storeId: string | undefined) {
         qc.invalidateQueries({ queryKey: productQueryKeys.lists() });
         // Best-effort surgical: bust each affected product's detail query.
         for (const productId of productIds) {
-          qc.invalidateQueries({ queryKey: productQueryKeys.detail(productId) });
+          qc.invalidateQueries({
+            queryKey: productQueryKeys.detail(productId),
+          });
         }
       })
       .subscribe();
 
-    channelRef.current = ch;
-
-    const sub = AppState.addEventListener('change', (state) => {
-      if (state === 'active' && channelRef.current?.state !== 'joined') {
-        channelRef.current?.subscribe();
-      }
-    });
+    hadSubscribedRef.current = true;
 
     return () => {
-      sub.remove();
       supabase.removeChannel(ch);
-      channelRef.current = null;
     };
-  }, [storeId, qc]);
+  }, [storeId, appActive, qc]);
 }
