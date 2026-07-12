@@ -6,7 +6,7 @@ import type { WishlistItem } from '../types';
  * Key matches the web FO storage key so a future shared sync can land cleanly.
  */
 const STORAGE_ID = 'khanhstore-wishlist';
-const KEY = 'kuden-wishlist-items';
+const KEY = 'storefront-wishlist-items';
 
 const mmkv = new MMKV({ id: STORAGE_ID });
 

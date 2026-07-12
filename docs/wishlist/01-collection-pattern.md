@@ -19,7 +19,7 @@ That's it. No variant, no qty, no price.
 import { createCollection, localStorageCollectionOptions, queryCollectionOptions } from '@tanstack/db';
 import { useQueryClient } from '@tanstack/react-query';
 
-const GUEST_STORAGE_KEY = 'kuden-wishlist-items';
+const GUEST_STORAGE_KEY = 'storefront-wishlist-items';
 
 function createGuestWishlistCollection() {
   return createCollection(

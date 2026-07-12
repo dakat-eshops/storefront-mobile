@@ -158,7 +158,7 @@ export function createGuestCartCollection() {
   return createCollection(
     localStorageCollectionOptions<CartStorageItem>({
       id: 'cart-items-guest',             // matches web FO collection id
-      storageKey: 'kuden-cart-items',     // MUST match web FO (CART_LOCAL_STORAGE_KEY)
+      storageKey: 'storefront-cart-items', // web FO uses store-scoped storefront-cart-items:{storeId}; mobile is single-store
       storage: mmkvStorage,               // swap browser localStorage for MMKV
       storageEventApi: noopStorageEventApi, // REQUIRED on RN — default `window` crashes
       getKey: (item) => item.itemId,      // CartStorageItem key is itemId, not id

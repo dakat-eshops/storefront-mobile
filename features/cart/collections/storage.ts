@@ -3,8 +3,11 @@ import type { CartStorageItem } from '../types';
 
 /**
  * MMKV-backed guest cart. The web FO stores the same shape in
- * `localStorage` under `kuden-cart-items`; the mobile equivalent uses MMKV
- * for sync access + survives app restarts (docs/_initial/05-data-layer.md).
+ * `localStorage` under `storefront-cart-items:{storeId}` (store-scoped); the
+ * mobile equivalent uses MMKV for sync access + survives app restarts
+ * (docs/_initial/05-data-layer.md). A mobile build targets exactly one store,
+ * so the mobile key stays unscoped — align the naming (not the scoping) with
+ * the web FO for future migration / shared sync.
  *
  * NOTE: this file is intentionally a thin wrapper over MMKV rather than a
  * full `localStorageCollectionOptions` shim. RN does not have `window`, and
@@ -14,7 +17,7 @@ import type { CartStorageItem } from '../types';
  * has the same end-user behavior on a single-process native app.
  */
 const STORAGE_ID = 'khanhstore-cart';
-const KEY = 'kuden-cart-items'; // MUST match the web FO key for future migration / shared sync.
+const KEY = 'storefront-cart-items';
 
 const mmkv = new MMKV({ id: STORAGE_ID });
 
