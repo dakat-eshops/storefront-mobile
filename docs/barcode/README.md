@@ -1,6 +1,6 @@
 # Barcode Feature — FO Mobile (storefront-mobile)
 
-FO mobile implementation of product barcodes. **Cross-repo SSOT lives in the BO**: [BO docs/barcode/02-barcode-schema.md](../../../../BO/e-Shops/docs/barcode/02-barcode-schema.md). Any change to the URL shape or resolver contract requires a coordinated update in all three repos before deployment.
+FO mobile implementation of product barcodes. **Cross-repo SSOT lives in the BO**: [BO docs/barcode/02-barcode-schema.md](../../../../BO/e-Shops/docs/commerce/barcode/02-barcode-schema.md). Any change to the URL shape or resolver contract requires a coordinated update in all three repos before deployment.
 
 ## What's shipped
 
@@ -69,4 +69,4 @@ When the app needs a "scan a product barcode to open it" feature:
 2. Call `GET /2026-01/fo/stores/:storeId/products/resolve-barcode/:barcode` (HMAC-guarded — not yet built in NestJS).
 3. Navigate to `/product/${id}` with the resolved product ID.
 
-See [BO docs/barcode/05-fo-integration.md](../../../../BO/e-Shops/docs/barcode/05-fo-integration.md) for the full resolver flow.
+See [BO docs/barcode/05-fo-integration.md](../../../../BO/e-Shops/docs/commerce/barcode/05-fo-integration.md) for the full resolver flow.

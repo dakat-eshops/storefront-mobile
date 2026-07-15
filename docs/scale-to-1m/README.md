@@ -1,13 +1,13 @@
 # Scale-to-1M — Pending RN Items
 
-The BO repo runs the [Scale to 1M DAU program](../../../../BO/e-Shops/docs/plans/How-to-handle-1-million-active-users-a-day/01-implementation-plan.md). All code-only dev-stage waves (BO tasks 7–12) shipped on 2026-07-03/04. Two items land in **this repo** and were deferred by owner decision ("RN is handled later") — this folder is their tracking doc so they don't get lost when mobile work resumes.
+The BO repo runs the [Scale to 1M DAU program](../../../../BO/e-Shops/docs/misc/plans/How-to-handle-1-million-active-users-a-day/01-implementation-plan.md). All code-only dev-stage waves (BO tasks 7–12) shipped on 2026-07-03/04. Two items land in **this repo** and were deferred by owner decision ("RN is handled later") — this folder is their tracking doc so they don't get lost when mobile work resumes.
 
 > **Status: ⏳ both open (as of 2026-07-04).** Neither blocks the BO/NestJS dev state. Neither is staging/prod-gated — both are local/simulator work in this repo.
 
 | # | BO plan task | What | State |
 | --- | --- | --- | --- |
-| 1 | [Wave 2 / task 9.4](../../../../BO/e-Shops/docs/plans/How-to-handle-1-million-active-users-a-day/01-implementation-plan.md) | Adopt HTTP conditional requests (ETag / 304) + generous TanStack Query `staleTime` on catalog screens | ⏳ Deferred until mobile work resumes (owner decision 2026-07-04) |
-| 2 | [Wave 4 / task 11.6](../../../../BO/e-Shops/docs/plans/How-to-handle-1-million-active-users-a-day/01-implementation-plan.md) | Simulator spot-check of `useAppActiveGate` — confirm the WS actually drops on background and rejoins on foreground | ⏳ Owner verification; code already shipped |
+| 1 | [Wave 2 / task 9.4](../../../../BO/e-Shops/docs/misc/plans/How-to-handle-1-million-active-users-a-day/01-implementation-plan.md) | Adopt HTTP conditional requests (ETag / 304) + generous TanStack Query `staleTime` on catalog screens | ⏳ Deferred until mobile work resumes (owner decision 2026-07-04) |
+| 2 | [Wave 4 / task 11.6](../../../../BO/e-Shops/docs/misc/plans/How-to-handle-1-million-active-users-a-day/01-implementation-plan.md) | Simulator spot-check of `useAppActiveGate` — confirm the WS actually drops on background and rejoins on foreground | ⏳ Owner verification; code already shipped |
 
 ---
 
@@ -56,7 +56,7 @@ Everything else — and **any request carrying `Authorization` or `x-signature`*
 
 ## Cross-references
 
-- BO implementation plan (SSOT for status): [01-implementation-plan.md](../../../../BO/e-Shops/docs/plans/How-to-handle-1-million-active-users-a-day/01-implementation-plan.md) — tasks 9.4 / 11.6 + Open Items table
-- BO strategy doc: [SCALE_TO_1M_USERS.md](../../../../BO/e-Shops/docs/plans/How-to-handle-1-million-active-users-a-day/SCALE_TO_1M_USERS.md)
+- BO implementation plan (SSOT for status): [01-implementation-plan.md](../../../../BO/e-Shops/docs/misc/plans/How-to-handle-1-million-active-users-a-day/01-implementation-plan.md) — tasks 9.4 / 11.6 + Open Items table
+- BO strategy doc: [SCALE_TO_1M_USERS.md](../../../../BO/e-Shops/docs/misc/plans/How-to-handle-1-million-active-users-a-day/SCALE_TO_1M_USERS.md)
 - Realtime lifecycle in this repo: [_initial/06-realtime.md](../_initial/06-realtime.md) · [broadcast/](../broadcast/README.md)
 - FO-web equivalents (reference implementations): `FO/KhanhStore/src/libs/realtime/useVisibilityGate.ts` (visibility gate) · `FO/KhanhStore/src/libs/server-api-client.ts` (`publicRead`)

@@ -26,5 +26,5 @@ Cancel and return request flows for mobile.
 - [../orders/02-order-detail.md](../orders/02-order-detail.md) — Cancel/return entry point (action buttons on order detail)
 - [../push-v2/01-extended-events.md](../push-v2/01-extended-events.md) — Cancel/return push notification events
 - [../loyalty-points/README.md](../loyalty-points/README.md) — Loyalty restoration via push notification (full mobile loyalty lifecycle)
-- BO cancel/return: [BO/e-Shops/docs/cancel-and-return-orders/README.md](../../../../BO/e-Shops/docs/cancel-and-return-orders/README.md)
-- FO web cancel/return: [FO/KhanhStore/docs/cancel_and_return_orders/README.md](../../../../FO/KhanhStore/docs/cancel_and_return_orders/README.md)
+- BO cancel/return: [BO/e-Shops/docs/cancel-and-return-orders/README.md](../../../../BO/e-Shops/docs/commerce/orders/cancel-and-return/README.md)
+- FO web cancel/return: [FO/KhanhStore/docs/cancel_and_return_orders/README.md](../../../KhanhStore/docs/cancel_and_return_orders/README.md)

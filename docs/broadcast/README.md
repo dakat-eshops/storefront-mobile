@@ -19,6 +19,6 @@ Supabase Realtime Broadcast subscriber patterns for the mobile storefront.
 
 ## Cross-references
 
-- BO Broadcast guide: [BO/e-Shops/docs/features/supabase/realtime/BROADCAST_FANOUT_GUIDE.md](../../../../BO/e-Shops/docs/features/supabase/realtime/BROADCAST_FANOUT_GUIDE.md)
-- FO web realtime: [FO/KhanhStore/src/libs/realtime/](../../../../FO/KhanhStore/src/libs/realtime/)
+- BO Broadcast guide: [BO/e-Shops/docs/features/supabase/realtime/BROADCAST_FANOUT_GUIDE.md](../../../../BO/e-Shops/docs/client/features/supabase/realtime/BROADCAST_FANOUT_GUIDE.md)
+- FO web realtime: [FO/KhanhStore/src/libs/realtime/](../../../KhanhStore/src/libs/realtime/)
 - `libs/supabase.ts`: Supabase client with `auth: { persistSession: false }`
