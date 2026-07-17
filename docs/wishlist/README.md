@@ -8,6 +8,17 @@ Wishlist collection pattern for mobile.
 | --- | --- |
 | [01-collection-pattern.md](01-collection-pattern.md) | TanStack DB collection, guest/authed split, toggle API, sign-in merge |
 
+## Code
+
+The runtime implementation lives alongside these docs (imported as `@/docs/wishlist/...`):
+
+| File | Topic |
+| --- | --- |
+| [hooks/use-wishlist.ts](hooks/use-wishlist.ts) | `useWishlist` hook — toggle API, guest/authed read/write |
+| [collections/storage.ts](collections/storage.ts) | MMKV read/write for the guest wishlist |
+| [collections/queryKeys.ts](collections/queryKeys.ts) | TanStack Query keys |
+| [types.ts](types.ts) | `WishlistItem` type |
+
 ## Key invariants
 
 1. **Single-field rows.** Wishlist items are just `{ productId }` — no quantity, no price snapshot. Simpler than cart.
@@ -20,4 +31,4 @@ Wishlist collection pattern for mobile.
 ## Cross-references
 
 - Cart pattern (reference implementation): [../_initial/05-data-layer.md](../_initial/05-data-layer.md)
-- FO web wishlist for structural reference: [FO/KhanhStore/docs/wishlist_feature/01-architecture.md](../../../../FO/KhanhStore/docs/wishlist_feature/01-architecture.md)
+- FO web wishlist for structural reference: [FO/KhanhStore/docs/wishlist/01-architecture.md](../../../../FO/KhanhStore/docs/wishlist/01-architecture.md)

@@ -15,7 +15,7 @@ import { env } from '@/libs/env';
 import {
   useIsWishlisted,
   useToggleWishlist,
-} from '@/features/wishlist/hooks/use-wishlist';
+} from '@/docs/wishlist/hooks/use-wishlist';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function ProductDetailScreen() {

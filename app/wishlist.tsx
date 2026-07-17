@@ -10,7 +10,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import {
   useRemoveFromWishlist,
   useWishlist,
-} from '@/features/wishlist/hooks/use-wishlist';
+} from '@/docs/wishlist/hooks/use-wishlist';
 import { formatPrice } from '@/features/products/utils/format-price';
 
 export default function WishlistScreen() {

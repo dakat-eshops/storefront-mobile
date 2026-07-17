@@ -15,7 +15,7 @@ That's it. No variant, no qty, no price.
 ## Collection factory
 
 ```ts
-// features/wishlist/collections/wishlist-collection.ts
+// docs/wishlist/collections/wishlist-collection.ts
 import { createCollection, localStorageCollectionOptions, queryCollectionOptions } from '@tanstack/db';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -68,7 +68,7 @@ export function useWishlistCollection() {
 ## Toggle hook (public API)
 
 ```ts
-// features/wishlist/hooks/use-wishlist.ts
+// docs/wishlist/hooks/use-wishlist.ts
 export function useWishlist() {
   const collection = useWishlistCollection();
   const { data: items } = useLiveQuery(
@@ -99,7 +99,7 @@ export function useWishlist() {
 ## Wishlist button component
 
 ```tsx
-// features/wishlist/components/wishlist-button.tsx
+// docs/wishlist/components/wishlist-button.tsx
 export function WishlistButton({ productId }: { productId: string }) {
   const { isWishlisted, toggle } = useWishlist();
   const active = isWishlisted(productId);
