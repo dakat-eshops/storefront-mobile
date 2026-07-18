@@ -16,6 +16,17 @@ Order history and order detail screens.
 3. **Pull-to-refresh invalidates the order query.** Order status can change from an external BO action (e.g., merchant marks as shipped). Users need a reliable way to refresh.
 4. **Push notifications navigate to order detail.** When the BO sends a status-change push, the deep link is `khanhstore://orders/:orderId`. See [../push-v2/01-extended-events.md](../push-v2/01-extended-events.md).
 
+## Code map
+
+| File | Purpose |
+| --- | --- |
+| [features/orders/collections/queryKeys.ts](../../features/orders/collections/queryKeys.ts) | Query keys |
+| [features/orders/hooks/use-orders.ts](../../features/orders/hooks/use-orders.ts) | Order history list (infinite scroll) |
+| [features/orders/hooks/use-order-detail.ts](../../features/orders/hooks/use-order-detail.ts) | Order detail |
+| [features/orders/components/OrderQrCode.tsx](../../features/orders/components/OrderQrCode.tsx) | Customer QR for the BO scanner ([../qr-code/](../qr-code/README.md)) |
+| [features/orders/types.ts](../../features/orders/types.ts) | Response types |
+| [app/orders.tsx](../../app/orders.tsx) + [app/orders/[orderId]/](../../app/orders/[orderId]/) | Screens (history, detail, cancel, return) |
+
 ## Cross-references
 
 - [../cancel-return/README.md](../cancel-return/README.md) — Cancel and return request flows

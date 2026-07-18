@@ -30,6 +30,25 @@ Mobile needs the same UX but uses different primitives:
 | Post-order item removal | `cart.removeItem(id)` per ordered item | `useRemoveCartItem().mutateAsync(id)` per ordered item |
 | Cart item qty field | `item.quantity` | `item.qty` (mobile `CartStorageItem` uses `qty`) |
 
+## Code map (current implementation)
+
+| File | Purpose |
+| --- | --- |
+| [features/cart/collections/storage.ts](../../features/cart/collections/storage.ts) | MMKV wrapper (`readCart` / `writeCart` / `clearCart`), key `storefront-cart-items` |
+| [features/cart/collections/queryKeys.ts](../../features/cart/collections/queryKeys.ts) | Query keys |
+| [features/cart/hooks/use-cart.ts](../../features/cart/hooks/use-cart.ts) | `useCart` + add/qty/remove mutations — MMKV-local for guest AND authed (see note) |
+| [features/cart/hooks/use-cart-selection.ts](../../features/cart/hooks/use-cart-selection.ts) | Shopee-style selection ([01-selection-hook.md](./01-selection-hook.md)) |
+| [features/cart/components/cart-sync-provider.tsx](../../features/cart/components/cart-sync-provider.tsx) | Guest→authed sync provider (currently invalidate-only, see note) |
+| [features/cart/types.ts](../../features/cart/types.ts) | `CartStorageItem` (`qty`, not `quantity`) |
+
+> **Note — server cart migration pending.** Mobile does NOT use TanStack DB
+> collections (RN has no `window` for the browser collection driver) — the cart
+> is a plain MMKV store read through `useQuery`. BO-side `/fo-mobile/cart`
+> endpoints (Redis-backed + `POST /cart/sync`) now exist in
+> `apps/api/src/modules/fo-mobile/cart/`, but the client hooks are still
+> 100% MMKV-local. When migrating: authed reads → `GET /cart`, mutations →
+> `/cart/items`, sync provider → real `POST /cart/sync` + clear MMKV on success.
+
 ## Cross-references
 
 - [../checkout/01-flow.md](../checkout/01-flow.md) — Checkout state machine, Zustand store, navigation guards

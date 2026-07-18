@@ -28,6 +28,21 @@ The runtime implementation lives alongside these docs (imported as `@/docs/wishl
 5. **Merge on sign-in.** `WishlistSyncProvider` reads MMKV directly, posts to `/fo-mobile/stores/:storeId/me/wishlist/sync`, clears MMKV on success.
 6. **No `onUpdate`.** Wishlist items are either present or absent — no update operation.
 
+## Code map (current implementation)
+
+| File | Purpose |
+| --- | --- |
+| [features/wishlist/collections/storage.ts](../../features/wishlist/collections/storage.ts) | MMKV wrapper, key `storefront-wishlist-items` |
+| [features/wishlist/collections/queryKeys.ts](../../features/wishlist/collections/queryKeys.ts) | Query keys |
+| [features/wishlist/hooks/use-wishlist.ts](../../features/wishlist/hooks/use-wishlist.ts) | `useWishlist` / `useIsWishlisted` / `useToggleWishlist` / `useRemoveFromWishlist` |
+| [features/wishlist/types.ts](../../features/wishlist/types.ts) | `WishlistItem` (`{ productId, addedAt }`) |
+
+> **Note — implementation is currently MMKV-only.** Invariants 4–5 above
+> (authed query collection + `WishlistSyncProvider` merge) describe the design
+> target, not shipped code: today guest AND authed users share the same MMKV
+> store via plain `useQuery`, and no sync provider file exists yet. Mobile does
+> not use TanStack DB `localStorageCollectionOptions` (RN has no `window`).
+
 ## Cross-references
 
 - Cart pattern (reference implementation): [../_initial/05-data-layer.md](../_initial/05-data-layer.md)
