@@ -49,6 +49,14 @@ When the user issues a **FIX** command targeting a specific screen or flow:
 - **One folder per design phase / workstream** (this repo's convention — see [docs/README.md](docs/README.md)). Do NOT edit `docs/_initial/` to track ongoing work — it is frozen historical design intent. Add a new sibling folder (e.g. `docs/checkout/`, `docs/push-v2/`) instead.
 - **Feature docs that required code changes MUST include an implementation plan / status section** (✅ / 🚧 / ⏳ + shipped file paths), same as the BO/FO rule. For mobile mirrors of cross-repo features, point at the BO-canonical plan and state the mobile-side status.
 - Keep the top-level [docs/README.md](docs/README.md) folder table in sync when adding or removing subfolders.
+- **Every new feature integration MUST log a history entry in Obsidian.** After shipping the feature's docs (README + implementation/status section), append an entry to the Obsidian note **`7 - Projects/e-commerce/app history/The new feature integrations`** in the same change — treat a missing entry as an incomplete deliverable, same as a missing `docs/` README. Read the note first to find the next sequential number, then append (never overwrite) two lines per feature: a numbered line with the feature name plus the integration datetime (`N. {Feature Name} — {YYYY-MM-DD HH:mm}:`, current date/time at the moment the entry is written), followed by an indented bullet line with the path to the feature's docs `README.md` (`- {path}`). If the feature spans multiple repos (BO / FO / mobile), add one path line per repo under the same numbered entry. Example:
+
+  ```text
+  1. Authentication — 2026-07-22 14:30:
+   - @BO - e-Shops/docs/auth/authentication/README.md
+  ```
+
+  Use the `mcp__obsidian-vault__obsidian_patch_content` / `obsidian_append_content` Obsidian MCP tool to write the entry — never a manual/other channel.
 
 ## Cross-Repo Contracts (SSOTs live elsewhere — never fork them here)
 
