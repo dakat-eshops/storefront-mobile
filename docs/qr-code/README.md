@@ -7,7 +7,7 @@ This repo owns the **QR display** side only. The BO owns the scanner.
 ## Cross-repo SSOT
 
 **Payload schema** is defined and versioned in the BO repo:
-`BO/e-Shops/docs/qr-code/02-qr-payload-schema.md`
+`BO/e-Shops/docs/commerce/qr-code/02-qr-payload-schema.md`
 
 Never change the payload shape here without a coordinated PR in the BO repo first.
 
@@ -29,6 +29,7 @@ Never change the payload shape here without a coordinated PR in the BO repo firs
 3. **No PII in payload** — `orderId` (UUID) + `storeId` + `orderNumber` only. Never add `profileId`, name, phone, or address.
 4. **`storeId` in payload is mandatory** — the BO scanner rejects QR codes without a matching `storeId`. Do not omit it.
 5. **Use `expo-keep-awake`** — prevent screen dimming while the QR is visible. The hook is in [01-implementation.md](01-implementation.md).
+6. **Render it, never store it** — the QR is built on-device on every render from the order data the screen already fetched (`storeId` + `orderId` + `orderNumber`). Do **not** persist it (no image file, no AsyncStorage entry, no data-URI), do **not** ask BO to pre-generate it at order creation, and do **not** add a background task for it. It is a `JSON.stringify` plus an SVG path — cheaper to recompute than to cache. Decision record (BO SSOT): `BO/e-Shops/docs/commerce/qr-code/08-generation-and-lifecycle.md`.
 
 ## Prop difference vs KhanhStore (web)
 
