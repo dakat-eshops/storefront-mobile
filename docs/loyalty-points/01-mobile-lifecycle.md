@@ -5,8 +5,9 @@ Mobile is a read-only participant in the loyalty system. This file maps each pha
 ## Phase 1 — Redeem at checkout
 
 **Direction**: wallet → order at checkout  
-**Who computes**: FO web server validates the spend; NestJS fo-mobile persists `loyaltyPointsUsed` in the order row  
-**Mobile role**: fetches wallet balance, lets the customer input points to spend, sends the amount in the order payload
+**Who decides**: **BO** — it applies the first-order gate and clamps to what the order total covers, then echoes the honoured figure as `loyaltyPointsApplied`  
+**Who debits**: FO web owns the wallet and debits **BO's `loyaltyPointsApplied`**  
+**Mobile role**: fetches wallet balance, lets the customer choose points to spend, sends the request — then renders **what BO applied**, never what it asked for
 
 Required API at checkout:
 
@@ -14,11 +15,31 @@ Required API at checkout:
 // POST /fo-mobile/stores/:storeId/orders
 {
   // ... existing fields
-  loyaltyPointsUsed: number;   // 0 when not spending; capped by server to min(balance, totalAmount)
+  loyaltyPointsUsed: number;   // 0 when not spending; a request, NOT a guarantee
+}
+// response carries the authoritative figure:
+{
+  loyaltyPointsApplied: number; // what BO actually honoured — may be 0 or clamped
 }
 ```
 
-The server validates the cap — mobile still sends whatever the user entered and lets NestJS reject out-of-bounds values with 422. Never allow a negative value.
+Three things mobile must get right here:
+
+1. **`loyaltyPointsApplied` is authoritative, and may be less than requested —
+   or `0`.** BO rejects the redemption (not the order) when the first-order gate
+   blocks it, and clamps when the request exceeds the order total. A checkout
+   that displays the requested figure will tell the customer they spent points
+   they still have.
+2. **BO does NOT validate against the wallet balance** — FO owns the wallet, and
+   BO cannot see it. The clamp is against the **order total** only. So the
+   balance check is mobile's/FO's responsibility; do not assume the server will
+   catch an over-spend.
+3. **Redemption is a tender, not a discount.** `orders.total_amount` and
+   `discount_amount` stay at **full price**; the points become a separate
+   `payments` row. Render the points as a payment line, never by subtracting
+   from the total — subtracting would show a total that disagrees with BO.
+
+Never send a negative value; the DTO rejects it.
 
 **Status**: ❌ not started. Requires Phase M1 (balance endpoint) before a meaningful UI can be built. See [03-implementation-plan.md](03-implementation-plan.md).
 
@@ -71,29 +92,56 @@ Mobile never applies these formulas — it receives the pre-computed integer in 
 
 ---
 
-## Phase 3 — Earn at delivery
+## Phase 3 — Earn: computed by BO at creation, credited by FO at delivery
 
-**Direction**: order → wallet when order status transitions to `delivered`  
-**Who computes**: FO web server, inside the delivered-status transaction  
-**Mobile role**: refetches profile; shows `+N điểm` on order detail screen if `loyaltyPointsEarned > 0`
+> ⚠️ **Corrected 2026-08-13.** This section previously said FO computes earning
+> inside the delivered-status transaction, and quoted a formula subtracting
+> `loyaltyPointsUsed × 1 VND/point`. Both were wrong: earning moved to **BO at
+> order creation** in W3b (2026-07-05), and that subtraction was **never
+> implemented in any repo** — it was removed from FO web's spec on 2026-08-08
+> as a documented-but-nonexistent rule. The `1 VND/point` constant was also
+> retired by the 2026-07-27 currency work. See the correction log in
+> [README.md](README.md).
 
-Earning is entirely server-side. Mobile learns about it the next time it fetches the profile or order detail. There is no push notification for earning — the app polls on next visit.
+**Direction**: order → wallet, in two distinct steps  
+**Who computes**: **BO**, at **order creation** — it writes `orders.loyaltyPointsEarned` and `orders.loyaltyRatioApplied` before the order is even paid  
+**Who credits**: **FO web**, on the `delivered` webhook — it credits BO's pre-computed number **verbatim**, with no re-derivation  
+**Mobile role**: shows the figure as **pending** from creation; as **earned** only once the order is delivered
 
-Earning formula (FO web side, for context):
+The split matters for mobile UI. `orders.loyaltyPointsEarned` is populated from
+the moment the order exists, so a screen that renders "you earned N points" as
+soon as it sees a non-zero value will claim points the customer cannot spend
+yet. Gate the "earned" state on delivery:
 
 ```
-earnedPoints = floor(eligibleSubtotal × loyaltyRatio / 100)
-eligibleSubtotal = max(
-  productSubTotal − couponDiscount − promotionDiscount − (loyaltyPointsUsed × 1 VND/point),
-  0
-)
+pending:  loyaltyPointsEarned > 0 && status !== 'delivered'
+earned:   loyaltyPointsEarned > 0 && status === 'delivered'
 ```
 
-`loyaltyRatio` is the customer's buyer-group earning rate (percent), resolved at delivery time from BO `BuyerGroupTable`.
+FO web ships exactly this (amber "pending" badge → green "earned" badge). Its
+badge was gated on `shipping` until 2026-07-19; that was a bug — `shipping`
+drives first-order tier graduation, **not** earning.
 
-Idempotency: `loyaltyPointsEarned > 0` on the FO order row acts as the guard — the earning trigger is a no-op on replay.
+Earning base, for context only — **mobile must never compute this**:
 
-**Status**: ❌ not started on mobile. FO web code is complete. End-to-end is blocked on BO Wave 2 (`order_status_changed` webhook + buyer-group sync). No mobile UI planned until BO side ships.
+```
+eligibleSubtotal = max(subTotal − discountAmount, 0)
+earnedPoints     = floor(eligibleSubtotal × loyaltyRatioApplied / 100 × currencyScale)
+```
+
+`currencyScale` derives from the store's ISO 4217 minor-unit exponent
+(`general.currency`) and is never stored — see BO
+`docs/commerce/loyalty-points/10-currency-handling.md`. Note redemption does
+**not** reduce `discountAmount` (points are a tender, not a discount), so a
+points-paid order still earns on that portion — a known, documented product
+decision, not a bug.
+
+There is no push notification for earning — mobile picks it up on next fetch.
+
+Idempotency: FO's `loyalty_ledger` `UNIQUE(order_id, kind, source_ref)` makes a
+replayed `delivered` webhook a no-op.
+
+**Status**: ❌ not started on mobile. BO + FO web are both complete — the "blocked on BO Wave 2" note here was stale (Wave 2 shipped 2026-05-12). Nothing on the server side blocks mobile work now.
 
 ---
 
@@ -113,13 +161,33 @@ If the wallet is insufficient to cover the full clawback, the shortfall is deduc
 
 ## Phase 5 — Tier promotion
 
-**Direction**: profile lifetime spend → tier membership row  
-**Who computes**: FO web server at order delivery, reading BO `BuyerGroupTable.spendThreshold`  
-**Mobile role**: none (tier changes reflected in buyer-group membership; no mobile UI planned yet)
+> ⚠️ **Corrected 2026-08-13.** This section previously described a **spend**-based
+> ladder reading `BuyerGroupTable.spendThreshold`. That column **does not exist
+> in any repo** — a grep over BO `packages/db` and `apps/api` returns nothing.
+> The ladder has always been **points**-based. `profiles.lifetimeSpend` does
+> exist but drives nothing.
 
-Auto-tier promotion is entirely server-side. If a customer crosses a tier threshold at delivery, the FO promotes them in the buyer-group membership table. Mobile does not observe this event directly — the customer's active tier may affect future earning rates, but this is resolved by the server.
+**Direction**: profile **cumulative points earned** (`profiles.lifetimePoints`) → tier membership row  
+**Who computes**: FO web server at order delivery (`resolveTierForPoints`), reading BO `buyer_groups.pointsThreshold`  
+**Mobile role**: none today — but see the manual-override note below before building any tier UI
 
-**Status**: FO web v2.5 code complete. No mobile UI planned.
+Auto-tier promotion is entirely server-side. When a delivered order pushes a
+customer's `lifetimePoints` past a tier's `pointsThreshold`, FO swaps their
+buyer-group membership. Mobile does not observe the event; it sees the result on
+the next profile fetch.
+
+Two behaviours any future mobile tier UI must respect:
+
+- **A manually-assigned tier freezes auto-promotion.** Membership rows carry
+  `isManual`; auto-promotion only ever touches `isManual = false` rows. A
+  customer comped into `gold` by an admin stays there even after earning enough
+  for `diamond`. Showing "N points to next tier" to such a customer would be a
+  lie — check the flag first.
+- **There is no auto-demotion.** Crossing back below a threshold never downgrades
+  anyone (`loyalty.downgradeAllowed` exists as a preference but has **zero
+  consumers** in either repo — v1 hard-codes no-demote).
+
+**Status**: FO web v2.5 code complete (the webhook hook was wired 2026-08-01 — it had been marked shipped while never actually firing). No mobile UI planned.
 
 ---
 

@@ -7,7 +7,20 @@ The mobile app has **no loyalty UI or API surface**. The only loyalty touchpoint
 - Push notification payloads documented in [../cancel-return/04-status-updates.md](../cancel-return/04-status-updates.md) (planned, not coded).
 - This docs folder.
 
-The FO web (KhanhStore) has v1 restoration shipped and v2 earning/clawback code-complete but blocked on BO Wave 2. Mobile must eventually reach feature parity.
+FO web (KhanhStore) has v1 restoration shipped and v2 earning/clawback shipped
+end-to-end. Mobile must eventually reach feature parity.
+
+> ⚠️ **Corrected 2026-08-13.** This file previously gated Phase M5 on "BO Wave 2
+> landing". **Wave 2 shipped 2026-05-12** — the `order_status_changed` webhook
+> and buyer-group sync have been live for months, and per-line clawback followed
+> on 2026-07-18. Nothing on the server side blocks mobile loyalty work today;
+> every remaining dependency is mobile-side or a NestJS `fo-mobile` endpoint
+> listed below. See the correction log in [README.md](README.md) for two further
+> model errors (earn ownership, spend-vs-points tiers) corrected in this folder.
+>
+> One **real** prerequisite this file does not yet list: BO's `loyalty.enabled`
+> master switch (default **OFF**) must be readable by mobile, or every screen
+> below risks rendering a program the merchant has not turned on.
 
 ---
 
@@ -151,11 +164,29 @@ The handler structure is already documented in [02-push-integration.md](02-push-
 
 ## Phase M5 — Earning display
 
-**Depends on**: Phase M2 (order detail loyalty fields) + BO Wave 2 landing.
+**Depends on**: Phase M2 (order detail loyalty fields). **No BO dependency** — Wave 2 shipped 2026-05-12.
 
-Once BO ships the `order_status_changed` webhook, earning fires on the FO web server when an order is delivered. The order detail response will then carry a non-zero `loyaltyPointsEarned`. Phase M2 already handles the display — no additional API or handler work needed.
+`orders.loyaltyPointsEarned` is written by **BO at order creation**, so the order
+detail response carries a non-zero value from the moment the order exists — not
+only after delivery. The wallet is credited separately, by FO web, on the
+`delivered` webhook.
 
-The profile balance refetch on mount will reflect the earned points without any push notification (earning is FO-local; BO does not push for earning). Users discover the credit by opening the app after delivery.
+That gap is the whole design of this screen: **gate the "earned" state on
+delivery**, and show anything earlier as *pending*.
+
+```
+pending:  loyaltyPointsEarned > 0 && status !== 'delivered'
+earned:   loyaltyPointsEarned > 0 && status === 'delivered'
+```
+
+Rendering "earned" off a non-zero value alone claims points the customer cannot
+spend yet. FO web ships the amber-pending → green-earned pair; its badge was
+gated on `shipping` until 2026-07-19, which was a bug (`shipping` drives
+first-order tier graduation, not earning).
+
+The profile balance refetch on mount reflects the credit without any push
+notification (BO does not push for earning). Users discover it by opening the
+app after delivery.
 
 ---
 
@@ -167,7 +198,7 @@ The profile balance refetch on mount will reflect the earned points without any 
 | M2 — Order detail loyalty fields | NestJS order detail response update | S |
 | M3 — Push handler wiring | Phase M1 (`profileQueryKeys`) | XS |
 | M4 — Checkout redemption | Phase M1 + NestJS order create `loyaltyPointsUsed` | M |
-| M5 — Earning display | Phase M2 + BO Wave 2 | XS (display only, M2 handles it) |
+| M5 — Earning display | Phase M2 (no BO dependency) | S (M2 handles fetch; needs the pending-vs-earned gate) |
 
 ## NestJS work required (BO repo: `apps/api/src/modules/fo-mobile/`)
 
@@ -183,7 +214,7 @@ The profile balance refetch on mount will reflect the earned points without any 
 M2 (no deps)
 M1 → M3 (unblocks push handler)
 M1 → M4 (unblocks checkout redemption)
-M2 + BO Wave 2 → M5 (earning display, last)
+M2 → M5 (earning display, last)
 ```
 
 M2 and M1 can be developed in parallel. M3 and M4 gate on M1 landing first.
