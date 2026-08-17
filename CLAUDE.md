@@ -38,8 +38,9 @@ When the user issues a **FIX** command targeting a specific screen or flow:
 4. **Diagnose from evidence** — read the logs, identify the real root cause, then apply a targeted fix.
 5. **Keep debug logs in place after applying the fix.** Do NOT remove them until the user explicitly confirms the fix works. If the first attempt doesn't resolve the issue, leave the existing logs and add more.
 6. **Only remove debug logs after the user confirms the fix is handled correctly.**
+7. **Lock in the fix with a regression test.** Once the user confirms the fix works, add coverage that reproduces the original bug using whatever test infra exists for that surface at the time. **No test suite is wired yet in this repo** (see the note below) — until one exists, document the bug, its repro steps, and the fix in the relevant `docs/` folder so it can be manually re-verified in a future FIX pass, and flag the surface as a priority once a test runner is wired. Once a suite exists for a given surface, treat this the same as BO/FO-web: the test MUST fail against the pre-fix code and pass against the fix. Never close out a FIX with zero record of how to re-verify it.
 
-> Rule: evidence before action. Never write a fix without first seeing logs that confirm the cause.
+> Rule: evidence before action. Never write a fix without first seeing logs that confirm the cause. Never consider a FIX closed without a regression test (or, until a suite exists, a documented re-verification note) locking it in.
 
 ## Documentation Rules
 
