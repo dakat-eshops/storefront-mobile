@@ -54,4 +54,4 @@ Mobile needs the same UX but uses different primitives:
 - [../checkout/01-flow.md](../checkout/01-flow.md) — Checkout state machine, Zustand store, navigation guards
 - [../checkout/04-review-confirm.md](../checkout/04-review-confirm.md) — Where `selectedItemIds` is consumed for the order payload
 - [../../features/cart/hooks/use-cart.ts](../../features/cart/hooks/use-cart.ts) — `useRemoveCartItem` (used for post-order cleanup)
-- Web FO reference: [FO/KhanhStore/docs/cart/](../../../KhanhStore/docs/cart/README.md) — web implementation to keep in sync with
+- Web FO reference: [FO/KhanhStore/docs/commerce/cart/](../../../KhanhStore/docs/commerce/cart/README.md) — web implementation to keep in sync with

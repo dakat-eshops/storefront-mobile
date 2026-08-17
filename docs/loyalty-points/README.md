@@ -50,7 +50,7 @@ Mobile is a **passive consumer** of the loyalty-points system. All wallet math (
 
 - [../cancel-return/04-status-updates.md](../cancel-return/04-status-updates.md) — push payloads that carry `loyaltyPointsRestored`
 - [../orders/02-order-detail.md](../orders/02-order-detail.md) — order detail screen (future: loyalty panel)
-- FO web contract: [FO/KhanhStore/docs/loyalty-points/README.md](../../../KhanhStore/docs/loyalty-points/README.md)
+- FO web contract: [FO/KhanhStore/docs/commerce/loyalty-points/README.md](../../../KhanhStore/docs/commerce/loyalty-points/README.md)
 - BO contract: [BO/e-Shops/docs/commerce/loyalty-points/README.md](../../../../BO/e-Shops/docs/commerce/loyalty-points/README.md)
 - BO manual QA + vulnerability checklist: [12-manual-testing-guide.md](../../../../BO/e-Shops/docs/commerce/loyalty-points/12-manual-testing-guide.md)
 

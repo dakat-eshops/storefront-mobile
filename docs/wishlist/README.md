@@ -46,4 +46,4 @@ The runtime implementation lives alongside these docs (imported as `@/docs/wishl
 ## Cross-references
 
 - Cart pattern (reference implementation): [../_initial/05-data-layer.md](../_initial/05-data-layer.md)
-- FO web wishlist for structural reference: [FO/KhanhStore/docs/wishlist/01-architecture.md](../../../../FO/KhanhStore/docs/wishlist/01-architecture.md)
+- FO web wishlist for structural reference: [FO/KhanhStore/docs/commerce/wishlist/01-architecture.md](../../../KhanhStore/docs/commerce/wishlist/01-architecture.md)

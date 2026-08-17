@@ -80,16 +80,16 @@ The web FO documents the same customer features from the web side — check the 
 
 | Mobile docs folder | Web FO counterpart | Parity notes |
 | --- | --- | --- |
-| [docs/cart/](docs/cart/README.md) | `KhanhStore/docs/cart/` + `CART_SYNC_IMPLEMENTATION.md` | Web = TanStack DB collections + `sessionStorage` handoff; mobile = MMKV + Zustand (RN has neither `window` nor `sessionStorage`) |
-| [docs/wishlist/](docs/wishlist/README.md) | `KhanhStore/docs/wishlist/` | Web has the per-store BO enable toggle — honour it on mobile too |
-| [docs/orders/](docs/orders/README.md) | `KhanhStore/docs/order-history/` | Same status lifecycle; mobile adds push deep links + QR |
+| [docs/cart/](docs/cart/README.md) | `KhanhStore/docs/commerce/cart/` + `CART_SYNC_IMPLEMENTATION.md` | Web = TanStack DB collections + `sessionStorage` handoff; mobile = MMKV + Zustand (RN has neither `window` nor `sessionStorage`) |
+| [docs/wishlist/](docs/wishlist/README.md) | `KhanhStore/docs/commerce/wishlist/` | Web has the per-store BO enable toggle — honour it on mobile too |
+| [docs/orders/](docs/orders/README.md) | `KhanhStore/docs/commerce/orders/order-history/` | Same status lifecycle; mobile adds push deep links + QR |
 | [docs/cancel-return/](docs/cancel-return/README.md) | `KhanhStore/docs/cancel_and_return_orders/` | Web reaches NestJS via HMAC; mobile via `/fo-mobile/` (Clerk + attestation) |
 | [docs/loyalty-points/](docs/loyalty-points/README.md) | `KhanhStore/docs/loyalty_points/` | FO web owns the wallet; mobile is a passive consumer + push restoration |
-| [docs/payments/](docs/payments/README.md) | `KhanhStore/docs/payments/` | Mobile adds app-switch + VietQR polling flavors |
-| [docs/products/](docs/products/README.md) | `KhanhStore/docs/products/` + `pdp/` + `plp/` | Web PDP/PLP guides define display + realtime behavior mobile mirrors |
-| [docs/content/](docs/content/README.md) | `KhanhStore/docs/payloadcms/` + `blogs/` + `policies/` + `careers/` | Same content collections, different read path (web: `/api/cms` REST; mobile: NestJS content API) |
-| [docs/qr-code/](docs/qr-code/README.md) | `KhanhStore/docs/qr-code/` | Web renders `react-qr-code`; mobile `react-native-qrcode-svg`; BO owns the scanner |
-| [docs/broadcast/](docs/broadcast/README.md) | `KhanhStore/docs/tanstack/` + `plp/05-realtime.md` + `inventory/` | Same channels; web adds ElectricSQL (mobile has none) — and web's "homepage never subscribes" cost rule applies to mobile's connection budget thinking |
+| [docs/payments/](docs/payments/README.md) | `KhanhStore/docs/commerce/payments/` | Mobile adds app-switch + VietQR polling flavors |
+| [docs/products/](docs/products/README.md) | `KhanhStore/docs/commerce/products/` + `pdp/` + `plp/` | Web PDP/PLP guides define display + realtime behavior mobile mirrors |
+| [docs/content/](docs/content/README.md) | `KhanhStore/docs/cms/payloadcms/` + `blogs/` + `policies/` + `careers/` | Same content collections, different read path (web: `/api/cms` REST; mobile: NestJS content API) |
+| [docs/qr-code/](docs/qr-code/README.md) | `KhanhStore/docs/commerce/qr-code/` | Web renders `react-qr-code`; mobile `react-native-qrcode-svg`; BO owns the scanner |
+| [docs/broadcast/](docs/broadcast/README.md) | `KhanhStore/docs/client/tanstack/` + `plp/05-realtime.md` + `inventory/` | Same channels; web adds ElectricSQL (mobile has none) — and web's "homepage never subscribes" cost rule applies to mobile's connection budget thinking |
 | [components/ui/rich-text-content.tsx](components/ui/rich-text-content.tsx) | `KhanhStore/docs/rich_text/` | Web doc explicitly tracks the "mobile RN fallback" — allow-list SSOT is BO `docs/tiptap/` |
 
 Web-only doc areas with **no mobile counterpart by design**: `responsive-ui/` (web breakpoints — RN is natively mobile), `admin/`, `system_cache/` / `guides/` cache architecture (mobile has no server cache — MMKV + TanStack Query only), `tanstack/` ElectricSQL shapes (no Electric on RN), `filter/`, `search_hints/`, `entity_translations/` (client-side locale resolution — adopt when mobile adds those surfaces).
