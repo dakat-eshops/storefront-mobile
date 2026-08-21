@@ -22,6 +22,7 @@ Documentation for the FO React Native app. Organized by phase so each batch of d
 | [qr-code/](./qr-code/README.md) | QR code display for customers — `react-native-qrcode-svg`, payload schema (cross-repo SSOT shared with BO scanner), compatibility contract. |
 | [barcode/](./barcode/README.md) | Product barcode display + scan — `react-native-barcode-svg`, `expo-camera` scanner, URL/resolver contract (cross-repo SSOT in BO `docs/barcode/`). |
 | [scale-to-1m/](./scale-to-1m/README.md) | Pending RN items from the BO Scale-to-1M program — conditional requests (ETag/304) + `staleTime` adoption (BO task 9.4, deferred) and the `useAppActiveGate` simulator spot-check (BO task 11.6). |
+| [resilience/](./resilience/README.md) | Local-first fallback — distinguishing "device offline" from "backend unreachable while online," both served by the same MMKV-persisted cache from `_initial/05-data-layer.md` but needing different user messaging. BO SSOT for the overall strategy. |
 
 ## Conventions
 
@@ -50,3 +51,4 @@ Features spanning repos must stay in lock-step — update both sides in the same
 | [barcode/](./barcode/README.md) | — | `docs/barcode/` (SSOT — 02-barcode-schema) |
 | [push-v2/](./push-v2/README.md) | — (web has no push) | Webhook `type` values: `docs/commerce/orders/cancel-and-return/` push-back contract |
 | [security/](./security/README.md) | — | `apps/api` guards (`ClerkMobileGuard`, `DeviceAttestationGuard`) |
+| [resilience/](./resilience/README.md) | `platform/degraded-mode/` | `docs/platform/resilience/` (**SSOT** — fail-open/fail-closed principles + core-infrastructure playbook) |

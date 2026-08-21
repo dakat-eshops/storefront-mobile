@@ -16,6 +16,27 @@ Guidance for Claude Code when working with this repository (**FO Mobile** — th
 - **Auth separation**: Clerk only (same Clerk org as web FO). Never touch Supabase Auth — the Supabase anon key here is for **Broadcast subscriptions only**.
 - **Cross-repo rule**: any FO feature (cart, checkout, orders, cancel/return, payments, wishlist, realtime, loyalty) must be considered for **both** FO surfaces. A feature that ships on web but is absent/broken on mobile is incomplete work.
 
+## Use the Skills — ALWAYS (CRITICAL)
+
+**This repo has no local `.claude/skills/` library — it consumes the sibling repos'.** Before writing code for any implementation or integration task, check the two indexes below and invoke the matching skill via the Skill tool:
+
+| Library | Covers | Index |
+| --- | --- | --- |
+| **BO** (shared, cross-repo — check first) | Every BO↔FO contract surface: cache tags, Broadcast payloads/channels, HMAC headers, webhook schemas, entity attributes, feature toggles (BO half), PayloadCMS collections, migrations, CI/CD | [BO/e-Shops/.claude/skills/README.md](../../BO/e-Shops/.claude/skills/README.md) |
+| **FO web** | Customer-domain entity scaffolding, feature-toggle FO read, FO test layers — the closest existing analogue for most mobile work | [FO/KhanhStore/.claude/skills/README.md](../KhanhStore/.claude/skills/README.md) |
+
+**This is not a suggestion.** Every wire contract this app depends on is owned elsewhere (see [Cross-Repo Contracts](#cross-repo-contracts-ssots-live-elsewhere--never-fork-them-here)), and the skills are what encode the ordering and hand-off rules for changing them safely.
+
+**The rules:**
+
+1. **Check the BO index first for anything that crosses a repo boundary** — a Broadcast payload, a channel name, a header, a webhook shape, a cache tag. Those originate in BO; a skill exists for nearly all of them.
+2. **Never fork or unilaterally edit a contract here.** Mirror it. If the SSOT needs to change, that change happens in the owning repo — then this repo mirrors it, per the Cross-Repo Contracts table.
+3. **A feature toggle is a BO decision.** `SITE_PREFERENCES_SCHEMA` + settings page + server gate is `/new-bo-toggle` in BO. Mobile only *reads* the resolved preference — never invent a mobile-local flag for a per-store feature, and never use an `EXPO_PUBLIC_*` env var for one (it cannot vary per tenant).
+4. **Read the FO web counterpart before building the mobile version.** Per the cross-repo rule above, a feature that ships on web but is absent or divergent on mobile is incomplete work — the FO skill for that pattern is the fastest way to see what web actually did.
+5. **When a BO/FO skill's steps don't fit Expo/React Native, adapt the platform layer — never the contract layer.** Wire format, key names, and auth flow stay identical; only the UI/storage/navigation implementation differs.
+6. **If a skill is wrong or stale, fix it in its owning repo in the same change** — same rule as "Stale docs are a bug". Do not work around it silently.
+7. **If a mobile-specific pattern gets repeated, propose a local `.claude/skills/` library** — follow the conventions table in the BO README.
+
 ## Auth Model — THE Non-Negotiable
 
 A mobile binary is statically analysable. **This app never ships a secret.**
