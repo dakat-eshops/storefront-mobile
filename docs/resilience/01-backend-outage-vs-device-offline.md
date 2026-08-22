@@ -1,5 +1,9 @@
 # 01 — Backend Outage vs. Device Offline
 
+> **Status: ✅ Shipped.** This doc originally proposed the design below; it now describes what's
+> actually in the codebase, corrected in two places against what the real code needed (see
+> [Corrections from the original proposal](#corrections-from-the-original-proposal)).
+
 ## Why this distinction matters
 
 A user staring at stale product data with no explanation reads it as "the app is broken." The same
@@ -7,78 +11,62 @@ screen with "You're offline" reads as expected and non-alarming — the user kno
 to do (reconnect). Collapsing both cases into one generic "offline" message actively hurts trust
 when the device's wifi icon is clearly full-bars and the app still says "offline."
 
-## Detection
+## Detection — two independent signals
 
-Combine two signals, not one:
+**Device connectivity** — [`libs/network-status.ts`](../../libs/network-status.ts) wraps
+`expo-network`'s `useNetworkState()`:
 
 ```ts
-// libs/network-status.ts
-import NetInfo from '@react-native-community/netinfo';
-
-export function useNetworkStatus() {
-  const [state, setState] = useState<{ isConnected: boolean; isInternetReachable: boolean | null }>({
-    isConnected: true,
-    isInternetReachable: true,
-  });
-
-  useEffect(() => {
-    return NetInfo.addEventListener((s) => {
-      setState({ isConnected: s.isConnected ?? false, isInternetReachable: s.isInternetReachable });
-    });
-  }, []);
-
-  return state;
+export function useNetworkStatus(): { isOffline: boolean } {
+  const state = Network.useNetworkState();
+  const isOffline = state.isConnected === false || state.isInternetReachable === false;
+  return { isOffline };
 }
 ```
 
-| `isConnected` | `isInternetReachable` | Meaning |
-| --- | --- | --- |
-| `false` | — | **Device offline** — no radio connection at all. |
-| `true` | `false` | **Device offline in practice** — connected to wifi with no internet (captive portal, router down). Treat the same as fully offline. |
-| `true` | `true` / `null` | Device has a working connection. Any API failure from here is a **backend** problem, not a device one. |
+`isInternetReachable` mirrors `isConnected` on iOS (no better signal available there); on Android it
+additionally catches a connected-but-no-internet network (captive portal, router with no WAN).
 
-Pair this with the same error-classification shape already built for web FO's infinite product
-loading — port the enum, don't invent a parallel one:
+**Backend reachability** — [`libs/connectivity-store.ts`](../../libs/connectivity-store.ts), a small
+Zustand store `useApiClient` (`libs/api-client.ts`) reports into on every request:
 
 ```ts
-// libs/api-error.ts — mirrors FO/KhanhStore's LazyLoadingErrorType
-export enum ApiErrorType {
-  NETWORK_ERROR = 'NETWORK_ERROR',   // fetch failed while isInternetReachable === true → backend/DNS/TLS issue
-  TIMEOUT_ERROR = 'TIMEOUT_ERROR',   // AbortController fired
-  SERVER_ERROR = 'SERVER_ERROR',     // HTTP 5xx
-  RATE_LIMIT_ERROR = 'RATE_LIMIT_ERROR',
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
+interface ConnectivityState {
+  backendUnreachable: boolean;
+  reportUnreachable: () => void; // fetch itself threw, or our own timeout fired — no response received
+  reportReachable: () => void;   // any response, success or error status — the backend WAS reached
 }
 ```
 
-`useNetworkStatus().isInternetReachable === false` is checked **first**, before classifying the
-API error — if the device is genuinely offline, don't bother distinguishing `TIMEOUT_ERROR` from
-`SERVER_ERROR`; it's noise. Only classify the error type once the device claims to have a working
-connection.
+The two signals are checked in that order: device-offline first (if the device has no connection,
+classifying *why* the last request failed is noise), backend-unreachable second.
 
-## The two banner states
+## The banner
+
+[`components/connectivity-banner.tsx`](../../components/connectivity-banner.tsx), mounted once in
+[`app/_layout.tsx`](../../app/_layout.tsx) above the `<Stack>` navigator (pushes content down, not an
+overlay — stays visible over modals too since they render inside the same `<Stack>`):
 
 ```tsx
-function ConnectivityBanner() {
-  const { isInternetReachable } = useNetworkStatus();
-  const lastApiErrorType = useLastApiErrorType(); // set by the api client on every failed request
+export function ConnectivityBanner() {
+  const { isOffline } = useNetworkStatus();
+  const backendUnreachable = useBackendUnreachable();
 
-  if (isInternetReachable === false) {
-    return <Banner tone="neutral" message="You're offline — showing saved data." />;
-  }
-  if (lastApiErrorType === ApiErrorType.SERVER_ERROR || lastApiErrorType === ApiErrorType.TIMEOUT_ERROR) {
-    return <Banner tone="warning" message="Having trouble reaching KhanhStore — showing saved data." />;
-  }
-  return null;
+  if (!(isOffline || backendUnreachable)) return null;
+
+  const message = isOffline
+    ? "You're offline — showing saved data."
+    : 'Having trouble reaching the server — showing saved data.';
+
+  return <View style={styles.container}><Text style={styles.text}>{message}</Text></View>;
 }
 ```
 
-Both states serve the same MMKV-persisted cache underneath — this is a **messaging** layer on top
-of the existing `offlineFirst` `networkMode`, not a new caching path. Nothing in
-`_initial/05-data-layer.md`'s data-layer design changes; only what the user is told changes.
+Both states serve the same MMKV-persisted TanStack Query cache underneath (`networkMode: 'offlineFirst'`,
+already shipped per [`_initial/05-data-layer.md`](../_initial/05-data-layer.md)) — this banner is a
+**messaging** layer on top, not a new caching path.
 
-## What stays exactly as designed today
+## What stays exactly as designed
 
 Per the [existing offline behavior table](../_initial/05-data-layer.md#offline-behavior) — reaffirmed,
 not changed, by this doc:
@@ -103,10 +91,26 @@ not changed, by this doc:
   itself couldn't reach the backend. Order detail should always re-fetch on push-open rather than
   trust the push payload as final state, same rule as the cancel/return push-back pattern on web FO.
 
-## Open item
+## Corrections from the original proposal
 
-The `ConnectivityBanner` pattern above is a **proposed** implementation shape, not yet verified
-against the current mobile codebase. Before shipping: confirm whether an `ApiErrorType`-equivalent
-classifier already exists on mobile (it may be partially there per
-[`_initial/05-data-layer.md` § Error handling](../_initial/05-data-layer.md#error-handling)) and
-extend it rather than introduce a second one.
+Two things in the original design didn't survive contact with the real codebase:
+
+1. **`@react-native-community/netinfo` is wrong for this project.** It's a bare React Native
+   community module — it needs a custom dev client / prebuild to work reliably, and this app runs
+   via plain `expo start` with no committed `ios`/`android` native folders (managed workflow).
+   **`expo-network`** is the correct choice: first-party Expo SDK package, already SDK-version-matched
+   (`~8.0.8` for Expo SDK 54 via `npx expo install`), and it ships its own `useNetworkState()` hook —
+   no manual `addEventListener`/`useState` plumbing needed, which simplified `network-status.ts`
+   below what the original snippet proposed.
+2. **No `ApiErrorType` enum, and none was needed.** The real `ApiError` class
+   (`libs/api-client.ts`) only carries `status` + `body` — there's no web-FO-style
+   `NETWORK_ERROR`/`TIMEOUT_ERROR`/`SERVER_ERROR` classification, and porting one over would have
+   been speculative scope beyond what this fix needs. The actual `fetch()` call also had **no
+   timeout at all** (a second, separate gap — a stalled backend hung indefinitely, which is bad
+   independent of this doc, since it also made "stalled backend" and "device lost connection
+   mid-request" indistinguishable). Fixed both at once: `request()` now runs behind a 15 s
+   `AbortController` (matching the ceiling on BO's `nestjsApiClient` and FO web's `serverApi`), and
+   classifies outcomes with a single boolean rather than a multi-value enum — "did we get a response
+   at all," reported into `connectivity-store.ts`. A caller-initiated abort (screen unmount) is
+   explicitly excluded from `reportUnreachable()` so navigating away mid-request doesn't false-positive
+   the banner.
