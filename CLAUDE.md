@@ -18,12 +18,13 @@ Guidance for Claude Code when working with this repository (**FO Mobile** — th
 
 ## Use the Skills — ALWAYS (CRITICAL)
 
-**This repo has no local `.claude/skills/` library — it consumes the sibling repos'.** Before writing code for any implementation or integration task, check the two indexes below and invoke the matching skill via the Skill tool:
+**This repo's only local `.claude/skills/` are platform-layer** — the Vercel React Native / Expo skill set (`vercel-react-native-skills`, `vercel-composition-patterns`), vendored from `vercel-labs/agent-skills` and model-invoked. They carry no cross-repo contract; they are advisory and always subordinate to this file. **Everything contract-shaped is still consumed from the sibling repos.** Before writing code for any implementation or integration task, check the indexes below and invoke the matching skill via the Skill tool:
 
 | Library | Covers | Index |
 | --- | --- | --- |
 | **BO** (shared, cross-repo — check first) | Every BO↔FO contract surface: cache tags, Broadcast payloads/channels, HMAC headers, webhook schemas, entity attributes, feature toggles (BO half), PayloadCMS collections, migrations, CI/CD | [BO/e-Shops/.claude/skills/README.md](../../BO/e-Shops/.claude/skills/README.md) |
 | **FO web** | Customer-domain entity scaffolding, feature-toggle FO read, FO test layers — the closest existing analogue for most mobile work | [FO/KhanhStore/.claude/skills/README.md](../KhanhStore/.claude/skills/README.md) |
+| **This repo** (platform-only) | RN/Expo list perf, animation, native modules, React composition | [.claude/skills/README.md](.claude/skills/README.md) |
 
 **This is not a suggestion.** Every wire contract this app depends on is owned elsewhere (see [Cross-Repo Contracts](#cross-repo-contracts-ssots-live-elsewhere--never-fork-them-here)), and the skills are what encode the ordering and hand-off rules for changing them safely.
 
@@ -35,7 +36,7 @@ Guidance for Claude Code when working with this repository (**FO Mobile** — th
 4. **Read the FO web counterpart before building the mobile version.** Per the cross-repo rule above, a feature that ships on web but is absent or divergent on mobile is incomplete work — the FO skill for that pattern is the fastest way to see what web actually did.
 5. **When a BO/FO skill's steps don't fit Expo/React Native, adapt the platform layer — never the contract layer.** Wire format, key names, and auth flow stay identical; only the UI/storage/navigation implementation differs.
 6. **If a skill is wrong or stale, fix it in its owning repo in the same change** — same rule as "Stale docs are a bug". Do not work around it silently.
-7. **If a mobile-specific pattern gets repeated, propose a local `.claude/skills/` library** — follow the conventions table in the BO README.
+7. **If a mobile-specific pattern gets repeated, add an authored skill to the local `.claude/skills/` library** — follow the conventions table in the BO README. Keep it platform-only; anything with a wire contract in it belongs in the BO library.
 
 ## Auth Model — THE Non-Negotiable
 
