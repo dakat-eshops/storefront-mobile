@@ -71,8 +71,12 @@ export default function CartScreen() {
             tint={Colors[scheme].tint}
             isSelected={selectedIds.has(item.itemId)}
             onToggle={toggleItem}
-            onInc={() => update.mutate({ itemId: item.itemId, qty: item.qty + 1 })}
-            onDec={() => update.mutate({ itemId: item.itemId, qty: item.qty - 1 })}
+            onInc={() => {
+              update.mutate({ itemId: item.itemId, qty: item.qty + 1 });
+            }}
+            onDec={() => {
+              update.mutate({ itemId: item.itemId, qty: item.qty - 1 });
+            }}
             onRemove={() => remove.mutate(item.itemId)}
           />
         )}
@@ -120,7 +124,13 @@ function SelectAllRow({
   return (
     <ThemedView style={styles.selectAllRow}>
       <ThreeStateCheckbox
-        state={isAllSelected ? 'checked' : isIndeterminate ? 'indeterminate' : 'unchecked'}
+        state={
+          isAllSelected
+            ? 'checked'
+            : isIndeterminate
+              ? 'indeterminate'
+              : 'unchecked'
+        }
         onPress={onToggle}
         accessibilityLabel="Select all items"
       />
@@ -170,7 +180,11 @@ function CartItemRow({
 
       <View style={styles.thumbWrap}>
         {item.imageUrl ? (
-          <Image source={{ uri: item.imageUrl }} style={styles.thumb} contentFit="cover" />
+          <Image
+            source={{ uri: item.imageUrl }}
+            style={styles.thumb}
+            contentFit="cover"
+          />
         ) : (
           <View style={[styles.thumb, styles.thumbPlaceholder]} />
         )}
@@ -224,7 +238,13 @@ function CartBottomBar({
   return (
     <ThemedView style={styles.footer}>
       <ThreeStateCheckbox
-        state={isAllSelected ? 'checked' : isIndeterminate ? 'indeterminate' : 'unchecked'}
+        state={
+          isAllSelected
+            ? 'checked'
+            : isIndeterminate
+              ? 'indeterminate'
+              : 'unchecked'
+        }
         onPress={onToggleAll}
         accessibilityLabel="Select all"
       />
@@ -246,9 +266,7 @@ function CartBottomBar({
           accessibilityState={{ disabled: isNoneSelected }}
         >
           <ThemedText style={styles.ctaText}>
-            {isNoneSelected
-              ? 'Select items'
-              : `Checkout (${selectedCount})`}
+            {isNoneSelected ? 'Select items' : `Checkout (${selectedCount})`}
           </ThemedText>
         </Pressable>
       </View>
@@ -282,7 +300,13 @@ const styles = StyleSheet.create({
   empty: { padding: 48, alignItems: 'center' },
 
   // Cart item row
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 10 },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
+    borderRadius: 10,
+  },
   rowDeselected: { opacity: 0.45 },
   checkboxWrap: { padding: 4 },
   thumbWrap: { width: 72, height: 72, borderRadius: 8, overflow: 'hidden' },
@@ -307,9 +331,19 @@ const styles = StyleSheet.create({
     borderTopColor: '#E5E7EB',
   },
   footerAllLabel: { fontSize: 13, color: '#6B7280' },
-  footerRight: { marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 12 },
+  footerRight: {
+    marginLeft: 'auto',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
   footerTotal: { fontSize: 15, fontWeight: '600' },
-  cta: { paddingVertical: 10, paddingHorizontal: 18, borderRadius: 8, alignItems: 'center' },
+  cta: {
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
   ctaDisabled: { opacity: 0.45 },
   ctaText: { color: '#fff', fontSize: 15, fontWeight: '600' },
 });

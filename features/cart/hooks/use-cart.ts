@@ -70,7 +70,9 @@ export function useUpdateCartItem() {
       writeCart(next);
       return next;
     },
-    onSuccess: (next) => qc.setQueryData(cartQueryKeys.detail('guest'), next),
+    onSuccess: (next) => {
+      qc.setQueryData(cartQueryKeys.detail('guest'), next);
+    },
   });
 }
 
