@@ -4,6 +4,7 @@ import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, V
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { OrderQrCode } from '@/features/orders/components/OrderQrCode';
+import { formatPrice } from '@/features/products/utils/format-price';
 import { useOrderDetail } from '@/features/orders/hooks/use-order-detail';
 import type { OrderStatus, OrderDetail } from '@/features/orders/hooks/use-order-detail';
 import { CancelReasonSheet } from '@/features/cancel-return/components/cancel-reason-sheet';
@@ -45,10 +46,6 @@ function returnRequestLabel(status: string): string {
   }
 }
 
-function formatVND(amount: number): string {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-}
-
 function OrderSummary({ order }: { order: OrderDetail }) {
   return (
     <View style={styles.card}>
@@ -59,22 +56,22 @@ function OrderSummary({ order }: { order: OrderDetail }) {
             <ThemedText style={styles.itemName} numberOfLines={2}>{item.itemName}</ThemedText>
             <ThemedText style={styles.itemQty}>x{item.quantity}</ThemedText>
           </View>
-          <ThemedText style={styles.itemPrice}>{formatVND(item.price * item.quantity)}</ThemedText>
+          <ThemedText style={styles.itemPrice}>{formatPrice(item.price * item.quantity, order.currency)}</ThemedText>
         </View>
       ))}
       <View style={styles.divider} />
       <View style={styles.summaryRow}>
         <ThemedText style={styles.summaryLabel}>Tạm tính</ThemedText>
-        <ThemedText>{formatVND(order.subtotal)}</ThemedText>
+        <ThemedText>{formatPrice(order.subtotal, order.currency)}</ThemedText>
       </View>
       <View style={styles.summaryRow}>
         <ThemedText style={styles.summaryLabel}>Phí giao hàng</ThemedText>
-        <ThemedText>{formatVND(order.shippingFee)}</ThemedText>
+        <ThemedText>{formatPrice(order.shippingFee, order.currency)}</ThemedText>
       </View>
       {order.discountAmount > 0 && (
         <View style={styles.summaryRow}>
           <ThemedText style={styles.summaryLabel}>Giảm giá</ThemedText>
-          <ThemedText style={styles.discount}>−{formatVND(order.discountAmount)}</ThemedText>
+          <ThemedText style={styles.discount}>−{formatPrice(order.discountAmount, order.currency)}</ThemedText>
         </View>
       )}
       {(order.loyaltyPointsUsed ?? 0) > 0 && (
@@ -85,7 +82,7 @@ function OrderSummary({ order }: { order: OrderDetail }) {
       )}
       <View style={[styles.summaryRow, styles.totalRow]}>
         <ThemedText type="defaultSemiBold">Tổng cộng</ThemedText>
-        <ThemedText type="defaultSemiBold">{formatVND(order.totalAmount)}</ThemedText>
+        <ThemedText type="defaultSemiBold">{formatPrice(order.totalAmount, order.currency)}</ThemedText>
       </View>
       {(order.loyaltyPointsEarned ?? 0) > 0 && (
         <View style={styles.summaryRow}>
@@ -129,7 +126,7 @@ function RequestStatusSection({ order }: { order: OrderDetail }) {
       )}
       {order.returnRequest?.refundAmount != null && (
         <ThemedText style={styles.refundAmount}>
-          Hoàn tiền: {formatVND(order.returnRequest.refundAmount)}
+          Hoàn tiền: {formatPrice(order.returnRequest.refundAmount, order.currency)}
         </ThemedText>
       )}
       {(order.returnRequest?.loyaltyPointsRestored ?? 0) > 0 && (

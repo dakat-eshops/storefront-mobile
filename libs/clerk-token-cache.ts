@@ -1,5 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
-import type { TokenCache } from '@clerk/clerk-expo/dist/cache';
+import type { TokenCache } from '@clerk/clerk-expo';
 
 /**
  * Clerk token cache backed by Expo SecureStore (iOS Keychain / Android Keystore).

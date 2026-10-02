@@ -31,6 +31,8 @@ export type ProductListItem = {
 
 export type ProductDetail = ProductListItem & {
   images?: ProductImage[];
+  /** Merchant rich-text product details (HTML) — `products.details`; returned by the public product endpoint. */
+  details?: string | null;
   /** GTIN / EAN-13 / UPC-A / Code128 barcode. Null when not set. Use variation.barcode when a specific variation is selected. */
   barcode?: string | null;
   variations?: Array<{

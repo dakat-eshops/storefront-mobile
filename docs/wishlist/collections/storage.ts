@@ -1,4 +1,6 @@
-import { MMKV } from 'react-native-mmkv';
+// react-native-mmkv v4: instances come from `createMMKV()` (`MMKV` is only a
+// type in v4, so constructing it threw at runtime) and `.delete` is `.remove`.
+import { createMMKV } from 'react-native-mmkv';
 import type { WishlistItem } from '../types';
 
 /**
@@ -8,7 +10,7 @@ import type { WishlistItem } from '../types';
 const STORAGE_ID = 'khanhstore-wishlist';
 const KEY = 'storefront-wishlist-items';
 
-const mmkv = new MMKV({ id: STORAGE_ID });
+const mmkv = createMMKV({ id: STORAGE_ID });
 
 export function readWishlist(): WishlistItem[] {
   const raw = mmkv.getString(KEY);
@@ -26,5 +28,5 @@ export function writeWishlist(items: WishlistItem[]): void {
 }
 
 export function clearWishlist(): void {
-  mmkv.delete(KEY);
+  mmkv.remove(KEY);
 }

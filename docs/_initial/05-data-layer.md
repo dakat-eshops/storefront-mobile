@@ -8,15 +8,16 @@ Same shape as web FO: **TanStack Query for reads, TanStack DB for cart/wishlist,
 // libs/query-client.ts
 import { QueryClient } from '@tanstack/react-query';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
-import { MMKV } from 'react-native-mmkv';
+// react-native-mmkv v4: `createMMKV()` (MMKV is a type only) and `.remove()` (was `.delete()`).
+import { createMMKV } from 'react-native-mmkv';
 import { ApiError } from '@/libs/api-client';
 
-const storage = new MMKV({ id: 'khanhstore-query-cache' });
+const storage = createMMKV({ id: 'khanhstore-query-cache' });
 
 const mmkvStorage = {
   setItem: (k: string, v: string) => Promise.resolve(storage.set(k, v)),
   getItem: (k: string) => Promise.resolve(storage.getString(k) ?? null),
-  removeItem: (k: string) => Promise.resolve(storage.delete(k)),
+  removeItem: (k: string) => Promise.resolve(storage.remove(k)),
 };
 
 export const queryClient = new QueryClient({
@@ -128,14 +129,15 @@ The web FO uses TanStack DB with `localStorageCollectionOptions` (guest) and `qu
 // features/cart/collections/cart.ts
 import { createCollection, localStorageCollectionOptions } from '@tanstack/db';
 import { queryCollectionOptions } from '@tanstack/query-db-collection';
-import { MMKV } from 'react-native-mmkv';
+// react-native-mmkv v4: `createMMKV()` (MMKV is a type only) and `.remove()` (was `.delete()`).
+import { createMMKV } from 'react-native-mmkv';
 import { queryClient } from '@/libs/query-client';
 import { cartQueryKeys } from './queryKeys';
 // CartStorageItem is the shared type from @eshops/db-types (types-only import).
 // Its primary key field is `itemId`, not `id`.
 import type { CartStorageItem } from '@eshops/db/types';
 
-const storage = new MMKV({ id: 'khanhstore-cart' });
+const storage = createMMKV({ id: 'khanhstore-cart' });
 
 // MMKV-backed shim that satisfies the `StorageApi` subset that
 // `localStorageCollectionOptions` actually uses (getItem/setItem/removeItem).
@@ -143,7 +145,7 @@ const storage = new MMKV({ id: 'khanhstore-cart' });
 const mmkvStorage = {
   getItem: (k: string) => storage.getString(k) ?? null,
   setItem: (k: string, v: string) => storage.set(k, v),
-  removeItem: (k: string) => storage.delete(k),
+  removeItem: (k: string) => storage.remove(k),
 };
 
 // `localStorageCollectionOptions` ALSO defaults `storageEventApi` to `window`

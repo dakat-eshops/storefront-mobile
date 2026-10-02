@@ -1,4 +1,6 @@
-import { MMKV } from 'react-native-mmkv';
+// react-native-mmkv v4: instances come from `createMMKV()` (`MMKV` is only a
+// type in v4, so constructing it threw at runtime) and `.delete` is `.remove`.
+import { createMMKV } from 'react-native-mmkv';
 import type { CartStorageItem } from '../types';
 
 /**
@@ -19,7 +21,7 @@ import type { CartStorageItem } from '../types';
 const STORAGE_ID = 'khanhstore-cart';
 const KEY = 'storefront-cart-items';
 
-const mmkv = new MMKV({ id: STORAGE_ID });
+const mmkv = createMMKV({ id: STORAGE_ID });
 
 export function readCart(): CartStorageItem[] {
   const raw = mmkv.getString(KEY);
@@ -37,7 +39,7 @@ export function writeCart(items: CartStorageItem[]): void {
 }
 
 export function clearCart(): void {
-  mmkv.delete(KEY);
+  mmkv.remove(KEY);
 }
 
 export const cartStorageKey = KEY;

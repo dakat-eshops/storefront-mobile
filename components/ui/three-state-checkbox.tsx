@@ -31,9 +31,10 @@ export function ThreeStateCheckbox({
       onPress={onPress}
       hitSlop={8}
       accessibilityRole="checkbox"
+      // RN expresses an indeterminate checkbox as `checked: 'mixed'` — there is
+      // no separate `mixed` key, so screen readers never announced it.
       accessibilityState={{
-        checked: state === 'checked',
-        mixed: state === 'indeterminate',
+        checked: state === 'indeterminate' ? 'mixed' : state === 'checked',
       }}
       accessibilityLabel={accessibilityLabel}
       style={[styles.box, isActive ? styles.boxActive : styles.boxInactive]}

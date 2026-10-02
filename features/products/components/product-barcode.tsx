@@ -37,12 +37,12 @@ export function ProductBarcode({ barcode, pdpUrl }: ProductBarcodeProps) {
         <Barcode
           value={barcode}
           format={barcodeFormatFor(barcode)}
-          background="white"
+          // react-native-barcode-svg's real prop names — `background` / `width`
+          // were silently ignored. The human-readable value is the <Text> above.
+          backgroundColor="white"
           lineColor="#000000"
-          width={1.5}
+          singleBarWidth={1.5}
           height={60}
-          text={barcode}
-          textStyle={styles.barcodeText}
         />
       </View>
 
@@ -72,10 +72,6 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#E5E7EB',
     borderRadius: 6,
-  },
-  barcodeText: {
-    fontSize: 10,
-    color: '#000000',
   },
   qrWrap: {
     backgroundColor: '#ffffff',

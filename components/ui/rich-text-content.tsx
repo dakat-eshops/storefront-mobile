@@ -57,7 +57,8 @@ export function RichTextContent({ html }: Props) {
           backgroundColor: '#F3F4F6',
           padding: 12,
           borderRadius: 6,
-          overflow: 'scroll',
+          // RN views support only 'hidden' | 'visible' — 'scroll' was invalid.
+          overflow: 'hidden',
         },
         a: { color: '#4F46E5', textDecorationLine: 'underline' },
       }}

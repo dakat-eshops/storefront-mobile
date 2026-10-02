@@ -1,13 +1,15 @@
 import { QueryClient } from '@tanstack/react-query';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
-import { MMKV } from 'react-native-mmkv';
+// react-native-mmkv v4: instances come from `createMMKV()` (`MMKV` is only a
+// type in v4, so constructing it threw at runtime) and `.delete` is `.remove`.
+import { createMMKV } from 'react-native-mmkv';
 import { env } from './env';
 
 /**
  * MMKV-backed persister. MMKV is sync; we wrap with Promise.resolve to
  * satisfy the async storage interface that the persister expects.
  */
-const storage = new MMKV({ id: 'storefront-query-cache' });
+const storage = createMMKV({ id: 'storefront-query-cache' });
 
 const mmkvStorage = {
   getItem: (key: string) => Promise.resolve(storage.getString(key) ?? null),
@@ -16,7 +18,7 @@ const mmkvStorage = {
     return Promise.resolve();
   },
   removeItem: (key: string) => {
-    storage.delete(key);
+    storage.remove(key);
     return Promise.resolve();
   },
 };
