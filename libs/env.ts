@@ -13,6 +13,8 @@ export const env = {
   appVersion: process.env.EXPO_PUBLIC_APP_VERSION ?? '1.0.0',
   /** FO web origin (e.g. https://store.example.com). Used to build QR deep-links on the product screen. */
   foWebUrl: process.env.EXPO_PUBLIC_FO_WEB_URL ?? '',
+  /** Cloudflare image host(s), comma-separated bare hosts. Unset = Cloudinary only. */
+  imageHost: process.env.EXPO_PUBLIC_IMAGE_HOST ?? '',
 } as const;
 
 if (__DEV__) {

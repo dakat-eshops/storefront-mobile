@@ -5,6 +5,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import type { ProductListItem } from '../types';
 import { formatPrice } from '../utils/format-price';
+import { toCloudflareImageUrl } from '@/libs/image-cdn';
 
 type Props = { product: ProductListItem };
 
@@ -20,7 +21,7 @@ export function ProductCard({ product }: Props) {
         <ThemedView style={styles.imageWrapper}>
           {imageUrl ? (
             <Image
-              source={{ uri: imageUrl }}
+              source={{ uri: toCloudflareImageUrl(imageUrl, 640) }}
               style={styles.image}
               contentFit="cover"
               transition={150}

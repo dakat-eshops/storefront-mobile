@@ -17,6 +17,7 @@ import {
   useToggleWishlist,
 } from '@/docs/wishlist/hooks/use-wishlist';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { toCloudflareImageUrl } from '@/libs/image-cdn';
 
 export default function ProductDetailScreen() {
   const scheme = useColorScheme() ?? 'light';
@@ -53,7 +54,7 @@ export default function ProductDetailScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <ThemedView style={styles.imageWrap}>
           {imageUrl ? (
-            <Image source={{ uri: imageUrl }} style={styles.image} contentFit="cover" />
+            <Image source={{ uri: toCloudflareImageUrl(imageUrl, 1280) }} style={styles.image} contentFit="cover" />
           ) : (
             <View style={[styles.image, styles.imagePlaceholder]} />
           )}
