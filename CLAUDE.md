@@ -50,6 +50,10 @@ A mobile binary is statically analysable. **This app never ships a secret.**
 - **Versioning convention** (matches BO CLAUDE.md): the `fo-mobile/` segment lives in the controller **path**, never in the version. Routes are `/2026-01/fo-mobile/...` — there is no `/fo-mobile/2026-01/...`.
 - **New NestJS FO endpoint rule**: any new `/fo/` endpoint that mobile needs gets a parallel `/fo-mobile/` controller (guards-only — it MUST reuse the existing `FoXxxService` class, never duplicate business logic). See `apps/api/src/modules/fo-mobile/fo-mobile.module.ts` in the BO repo.
 
+## Working Across Devices (iMac / MacBook / Windows)
+
+Same rules as BO — SSOT: [BO 05-multi-device.md](../../BO/e-Shops/docs/start-here/claude-code-enhancement/05-multi-device.md). In short: only git travels (push before switching devices; stashes don't move); durable rules go in this file or `docs/`, not Claude auto-memory (per device, synced via the private `~/dotfiles` repo); a refused `git pull` is handled by backup → stash only the blocked files → `pull --ff-only` → `stash pop` (never `reset --hard`); env files come from the password manager; Windows runs everything in WSL2; Node 22.
+
 ## FIX Command Protocol
 
 When the user issues a **FIX** command targeting a specific screen or flow:
