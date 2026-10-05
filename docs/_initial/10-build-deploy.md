@@ -136,7 +136,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        with: { node-version-file: '.nvmrc' }   # Node 24
       - uses: pnpm/action-setup@v3
         with: { version: 9 }
       - run: pnpm install --frozen-lockfile

@@ -52,7 +52,7 @@ A mobile binary is statically analysable. **This app never ships a secret.**
 
 ## Working Across Devices (iMac / MacBook / Windows)
 
-Same rules as BO — SSOT: [BO 05-multi-device.md](../../BO/e-Shops/docs/start-here/claude-code-enhancement/05-multi-device.md). In short: only git travels (push before switching devices; stashes don't move); durable rules go in this file or `docs/`, not Claude auto-memory (per device, synced via the private `~/dotfiles` repo); a refused `git pull` is handled by backup → stash only the blocked files → `pull --ff-only` → `stash pop` (never `reset --hard`); env files come from the password manager; Windows runs everything in WSL2; Node 22.
+Same rules as BO — SSOT: [BO 05-multi-device.md](../../BO/e-Shops/docs/start-here/claude-code-enhancement/05-multi-device.md). In short: only git travels (push before switching devices; stashes don't move); durable rules go in this file or `docs/`, not Claude auto-memory (per device, synced via the private `~/dotfiles` repo); a refused `git pull` is handled by backup → stash only the blocked files → `pull --ff-only` → `stash pop` (never `reset --hard`); env files come from the password manager; Windows runs everything in WSL2; Node 24 (`.nvmrc`).
 
 ## FIX Command Protocol
 
