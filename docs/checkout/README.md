@@ -10,6 +10,7 @@ Full checkout flow: cart → shipping address → payment method → review → 
 | [02-shipping-address.md](02-shipping-address.md) | Address form, province/district/ward picker, Vietnamese address format |
 | [03-payment.md](03-payment.md) | Payment method selection and gateway integration |
 | [04-review-confirm.md](04-review-confirm.md) | Order summary screen, confirm mutation, success/failure handling |
+| [05-delivery-options.md](05-delivery-options.md) | Giao thường / Hoả tốc {x}h picker — ⏳ blocked on mobile checkout; contract + the BO endpoints it needs |
 
 ## Key invariants
 
