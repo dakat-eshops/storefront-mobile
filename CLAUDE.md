@@ -274,6 +274,7 @@ All config is `EXPO_PUBLIC_*` — **inlined into the bundle at build time and th
 10. **Realtime subscribers must gate on `useAppActiveGate`** and reconcile on rejoin.
 11. **Mobile-first stays additive** — don't re-implement a screen the web FO already does well; ship the native-only affordances (push, offline, scan, deep links, app-switch payments).
 12. **FO feature parity check** — before declaring any FO feature done (in any repo), verify whether this app needs the same change; if deferred, say so explicitly in the PR/plan.
+13. **Merge targets** — `feature/*` / `feat/*` and `fix/*` branches merge into **`develop`**, **never into `main`** (`gh pr create --base develop`). `main` only receives promotions from `staging` (and `hotfix/*`), same 4-tier model as BO/FO web.
 
 ## Reading Order Before Changing Anything
 
