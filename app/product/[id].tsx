@@ -18,6 +18,7 @@ import {
 } from '@/docs/wishlist/hooks/use-wishlist';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { toCloudflareImageUrl } from '@/libs/image-cdn';
+import { stillImages } from '@/libs/media';
 
 export default function ProductDetailScreen() {
   const scheme = useColorScheme() ?? 'light';
@@ -46,7 +47,7 @@ export default function ProductDetailScreen() {
   const imageUrl =
     typeof data.defaultImage === 'string'
       ? data.defaultImage
-      : data.defaultImage?.url ?? data.images?.[0]?.url ?? null;
+      : data.defaultImage?.url ?? stillImages(data.images)[0]?.url ?? null;
 
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>

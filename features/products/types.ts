@@ -14,6 +14,8 @@ export type ProductImage = {
   width?: number | null;
   height?: number | null;
   blurhash?: string | null;
+  /** `'image'` | `'video'` — video rows are skipped until mobile has a renderer (`libs/media.ts`). */
+  type?: string | null;
 };
 
 export type ProductListItem = {
