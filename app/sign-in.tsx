@@ -1,4 +1,4 @@
-import { useSignIn } from '@clerk/clerk-expo';
+import { useSignIn } from '@clerk/expo';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
@@ -9,7 +9,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 
 /**
  * Minimal email + password sign-in. Per docs/_initial/03-authentication.md
- * Clerk Expo SDK owns the session; we just call signIn.create + setActive.
+ * Clerk Expo SDK owns the session; we just call signIn.password + finalize.
  *
  * Sign-up, OAuth, and password reset live in future iterations; this screen
  * unblocks the cart-sync flow end-to-end.
@@ -17,21 +17,30 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function SignInScreen() {
   const scheme = useColorScheme() ?? 'light';
   const router = useRouter();
-  const { signIn, setActive, isLoaded } = useSignIn();
+  const { signIn } = useSignIn();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
 
   const onSubmit = async () => {
-    if (!isLoaded) return;
     setBusy(true);
     try {
-      const attempt = await signIn.create({ identifier: email, password });
-      if (attempt.status === 'complete') {
-        await setActive({ session: attempt.createdSessionId });
+      // Clerk Core 3: methods resolve { error } instead of throwing, and
+      // `signIn` reflects the updated attempt once they settle.
+      const { error } = await signIn.password({ identifier: email, password });
+      if (error) {
+        Alert.alert('Sign-in failed', error.longMessage ?? error.message);
+        return;
+      }
+      if (signIn.status === 'complete') {
+        const { error: finalizeError } = await signIn.finalize();
+        if (finalizeError) {
+          Alert.alert('Sign-in failed', finalizeError.longMessage ?? finalizeError.message);
+          return;
+        }
         router.back();
       } else {
-        Alert.alert('Sign-in incomplete', `Status: ${attempt.status}`);
+        Alert.alert('Sign-in incomplete', `Status: ${signIn.status}`);
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';

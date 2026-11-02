@@ -113,7 +113,7 @@ OTA updates via Expo Updates bypass app store review. Limit what can change via 
 pnpm audit --production
 ```
 
-Flag any high or critical CVEs in auth, crypto, or network libraries. Do not ship with known high-severity vulnerabilities in `expo-secure-store`, `@clerk/clerk-expo`, or `react-native-ssl-pinning`.
+Flag any high or critical CVEs in auth, crypto, or network libraries. Do not ship with known high-severity vulnerabilities in `expo-secure-store`, `@clerk/expo`, or `react-native-ssl-pinning`.
 
 ## Summary table
 

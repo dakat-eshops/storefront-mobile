@@ -64,7 +64,7 @@ export default function ScanScreen() {
     <View style={styles.root}>
       <Stack.Screen options={{ title: 'Scan product', presentation: 'modal' }} />
       <CameraView
-        style={StyleSheet.absoluteFillObject}
+        style={StyleSheet.absoluteFill}
         facing="back"
         onBarcodeScanned={scanned ? undefined : handleBarcode}
         barcodeScannerSettings={{
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#000' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, padding: 24 },
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
   },

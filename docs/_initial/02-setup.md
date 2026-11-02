@@ -36,7 +36,7 @@ Pin the SDK in `package.json` (Expo SDK 53 = RN 0.79; bump to 54 once stable):
 
 ```bash
 pnpm add \
-  @clerk/clerk-expo \
+  @clerk/expo \
   @supabase/supabase-js \
   @tanstack/react-query @tanstack/query-async-storage-persister @tanstack/react-query-persist-client \
   @tanstack/react-db @tanstack/db @tanstack/query-db-collection \

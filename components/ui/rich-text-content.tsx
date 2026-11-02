@@ -1,12 +1,12 @@
-import RenderHtml from 'react-native-render-html';
+import RenderHtml from '@native-html/render';
 import { useWindowDimensions } from 'react-native';
 
 /**
  * Renders sanitized HTML from the `details` column in React Native.
  *
- * Uses react-native-render-html which maps the allow-listed HTML tags
- * (p, strong, em, ul, ol, li, a, blockquote, code, h1-h4) to native RN
- * components — no WebView, no DOM.
+ * Uses @native-html/render (the maintained successor of react-native-render-html)
+ * which maps the allow-listed HTML tags (p, strong, em, ul, ol, li, a,
+ * blockquote, code, h1-h4) to native RN components — no WebView, no DOM.
  *
  * The HTML string has already been sanitized by the NestJS write-path
  * (`sanitizeRichText`) before being stored. This component is a read-only

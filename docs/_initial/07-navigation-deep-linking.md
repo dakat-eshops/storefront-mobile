@@ -98,7 +98,7 @@ If a deep link lands on a screen that requires auth (e.g., `/orders/:id`), the r
 ```tsx
 // app/orders/_layout.tsx
 import { Redirect, Slot, usePathname } from 'expo-router';
-import { useAuth } from '@clerk/clerk-expo';
+import { useAuth } from '@clerk/expo';
 
 export default function OrdersLayout() {
   const { isSignedIn, isLoaded } = useAuth();

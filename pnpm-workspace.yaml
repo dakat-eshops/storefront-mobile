@@ -1,8 +1,36 @@
 allowBuilds:
-  '@clerk/shared': set this to true or false
-  browser-tabs-lock: set this to true or false
-  bufferutil: set this to true or false
-  core-js: set this to true or false
-  unrs-resolver: set this to true or false
-  utf-8-validate: set this to true or false
+  '@clerk/shared': false
+  browser-tabs-lock: false
+  bufferutil: false
+  core-js: false
+  unrs-resolver: false
+  utf-8-validate: false
 nodeLinker: hoisted
+
+# Security floors (2026-11-02 audit). Each entry raises a vulnerable transitive
+# dep to the newest patched release IN ITS OWN MAJOR — never across majors, so
+# Expo tooling keeps the API it was built against. One entry per major line;
+# when an advisory raises a floor, replace that line's entry, and prune entries
+# that match nothing (SDK 58 dropped the tar/undici lines).
+# Not covered: minimatch <11 / glob 13 under @expo/config-plugins (no patched
+# release in those lines).
+overrides:
+  '@babel/core@>=7.0.0 <7.29.1': ^7.29.1
+  '@xmldom/xmldom@>=0.8.0 <0.8.15': ^0.8.15
+  '@xmldom/xmldom@>=0.9.0 <0.9.12': ^0.9.12
+  baseline-browser-mapping@>=2.0.0 <2.11.0: ^2.11.0
+  brace-expansion@>=1.0.0 <1.1.21: ^1.1.21
+  brace-expansion@>=2.0.0 <2.1.7: ^2.1.7
+  brace-expansion@>=5.0.0 <5.0.12: ^5.0.12
+  browserslist@>=4.0.0 <4.28.7: ^4.28.7
+  compression@>=1.0.0 <1.8.2: ^1.8.2
+  js-yaml@>=3.0.0 <3.15.2: ^3.15.2
+  js-yaml@>=4.0.0 <4.3.2: ^4.3.2
+  nanoid@>=3.0.0 <3.3.18: ^3.3.18
+  node-forge@>=1.0.0 <1.4.1: ^1.4.1
+  postcss@>=8.0.0 <8.5.23: ^8.5.23
+  shell-quote@>=1.0.0 <1.8.5: ^1.9.0 # no 1.8.5 was published; 1.9.0 is the first patched
+  source-map-js@>=1.0.0 <1.2.2: ^1.2.2
+  ws@>=6.0.0 <6.2.4: ^6.2.4
+  ws@>=7.0.0 <7.5.11: ^7.5.11
+  ws@>=8.0.0 <8.21.0: ^8.21.0

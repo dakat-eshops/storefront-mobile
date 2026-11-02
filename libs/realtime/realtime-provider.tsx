@@ -1,4 +1,4 @@
-import { useAuth } from '@clerk/clerk-expo';
+import { useAuth } from '@clerk/expo';
 import { useEffect, type PropsWithChildren } from 'react';
 import { env } from '../env';
 import { supabase } from '../supabase';

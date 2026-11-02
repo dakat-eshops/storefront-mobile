@@ -189,7 +189,7 @@ The NestJS `DeviceAttestationGuard` verifies these tokens against Apple App Atte
 
 ```ts
 // libs/api-client.ts
-import { useAuth } from '@clerk/clerk-expo';
+import { useAuth } from '@clerk/expo';
 import { useDeviceAttestation } from '@/libs/device-attestation';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL!;

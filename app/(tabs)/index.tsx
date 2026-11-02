@@ -29,10 +29,12 @@ export default function HomeScreen() {
           if (hasNextPage && !isFetchingNextPage) fetchNextPage();
         }}
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={() => refetch()} />
+          <RefreshControl refreshing={isRefetching} onRefresh={() => {
+            void refetch();
+          }} />
         }
         ListEmptyComponent={
-          isLoading ? null : (
+          isLoading ? undefined : (
             <View style={styles.empty}>
               <ThemedText>No products yet.</ThemedText>
             </View>

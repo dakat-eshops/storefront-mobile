@@ -146,14 +146,14 @@ pnpm expo run:ios          # or: pnpm expo run:android
 | Category | Technologies |
 | --- | --- |
 | Framework | Expo ~54 / React Native 0.81 / React 19 + **Expo Router** (file-based, typed routes) |
-| Auth | Clerk (`@clerk/clerk-expo`) — token cache in `expo-secure-store` ([libs/clerk-token-cache.ts](libs/clerk-token-cache.ts)) |
+| Auth | Clerk (`@clerk/expo`) — token cache in `expo-secure-store` ([libs/clerk-token-cache.ts](libs/clerk-token-cache.ts)) |
 | Data | TanStack Query v5 + MMKV persister (offline-first) — see Data Layer below |
 | Guest storage | `react-native-mmkv` (cart, wishlist, query cache) |
 | UI state | Zustand (checkout selection handoff only) |
 | Realtime | Supabase Broadcast (`@supabase/supabase-js`) — **subscribe-only**, anon key |
 | Push | `expo-notifications` (Expo push service) |
 | QR / barcode | `react-native-qrcode-svg`, `react-native-barcode-svg`, `expo-camera` (scan) |
-| Rich text | `react-native-render-html` (CMS Lexical content via shared renderer) |
+| Rich text | `@native-html/render`, successor of `react-native-render-html` (CMS Lexical content via shared renderer) |
 
 ## Repo Layout
 
