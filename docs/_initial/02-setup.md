@@ -203,7 +203,8 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(monorepoRoot, 'node_modules'),
 ];
-config.resolver.disableHierarchicalLookup = true;
+// Keep hierarchical lookup ON (Expo default): disabling it hides nested
+// node_modules and breaks deps that need a different major than the root hoist.
 // Block the runtime entrypoint of @eshops/db from RN bundles
 config.resolver.blockList = [
   /BO\/e-Shops\/packages\/db\/src\/(?!types).*\.ts$/,
