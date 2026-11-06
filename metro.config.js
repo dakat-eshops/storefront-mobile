@@ -17,7 +17,10 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, 'node_modules'),
 ];
 
-config.resolver.disableHierarchicalLookup = true;
+// Hierarchical lookup stays ON (Expo default). Turning it off made Metro skip
+// nested node_modules, so a package needing a different major of a shared dep
+// (e.g. htmlparser2 → entities@7 while the root hoists entities@4) resolved
+// the wrong copy and the bundle failed.
 
 // Block server-only files from @eshops/db so React Native bundle stays lean.
 // Allow only the types entry point.

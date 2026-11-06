@@ -9,7 +9,7 @@ Clerk needs a token cache to persist sessions across app launches. On RN, use `e
 ```ts
 // libs/clerk-token-cache.ts
 import * as SecureStore from 'expo-secure-store';
-import type { TokenCache } from '@clerk/clerk-expo';
+import type { TokenCache } from '@clerk/expo';
 
 export const tokenCache: TokenCache = {
   async getToken(key) {
@@ -35,7 +35,7 @@ export const tokenCache: TokenCache = {
 
 ```tsx
 // app/_layout.tsx
-import { ClerkProvider, ClerkLoaded } from '@clerk/clerk-expo';
+import { ClerkProvider, ClerkLoaded } from '@clerk/expo';
 import { tokenCache } from '@/libs/clerk-token-cache';
 import { Stack } from 'expo-router';
 
@@ -58,27 +58,23 @@ Use Clerk's prebuilt components OR roll your own with `useSignIn` / `useSignUp`.
 
 ```tsx
 // app/(auth)/sign-in.tsx
-import { useSignIn } from '@clerk/clerk-expo';
+import { useSignIn } from '@clerk/expo';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { TextInput, Button, View } from 'react-native';
 
 export default function SignInScreen() {
-  const { signIn, setActive, isLoaded } = useSignIn();
+  const { signIn } = useSignIn();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  if (!isLoaded) return null;
-
+  // Clerk Core 3 (@clerk/expo): methods resolve { error } instead of throwing.
   const onSubmit = async () => {
-    try {
-      const result = await signIn.create({ identifier: email, password });
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId });
-        router.replace('/(tabs)');
-      }
-    } catch (err) {
-      // surface Clerk error code to the user (ClerkAPIResponseError)
+    const { error } = await signIn.password({ identifier: email, password });
+    if (error) return; // surface error.longMessage ?? error.message to the user
+    if (signIn.status === 'complete') {
+      const { error: finalizeError } = await signIn.finalize();
+      if (!finalizeError) router.replace('/(tabs)');
     }
   };
 
@@ -98,7 +94,7 @@ Mobile gateway requests must forward the Clerk session token as `Authorization: 
 
 ```ts
 // libs/api-client.ts (excerpt — full version in 04-api-client.md)
-import { useAuth } from '@clerk/clerk-expo';
+import { useAuth } from '@clerk/expo';
 
 export function useApiClient() {
   const { getToken } = useAuth();
@@ -138,7 +134,7 @@ This means: **after sign-up on mobile, `publicMetadata.profileId` may not exist 
 ## Sign-out
 
 ```tsx
-import { useAuth } from '@clerk/clerk-expo';
+import { useAuth } from '@clerk/expo';
 const { signOut } = useAuth();
 await signOut();
 // also clear app-local caches that contain user-scoped data:

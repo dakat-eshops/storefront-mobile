@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { useAuth } from "@clerk/clerk-expo";
+import { useAuth } from "@clerk/expo";
 import { useConnectivityStore } from "./connectivity-store";
 import { env } from "./env";
 import { useDeviceAttestation } from "./device-attestation";

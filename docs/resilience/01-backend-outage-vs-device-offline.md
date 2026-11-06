@@ -99,7 +99,7 @@ Two things in the original design didn't survive contact with the real codebase:
    community module — it needs a custom dev client / prebuild to work reliably, and this app runs
    via plain `expo start` with no committed `ios`/`android` native folders (managed workflow).
    **`expo-network`** is the correct choice: first-party Expo SDK package, already SDK-version-matched
-   (`~8.0.8` for Expo SDK 54 via `npx expo install`), and it ships its own `useNetworkState()` hook —
+   (`~58.0.4` for Expo SDK 58 via `npx expo install`), and it ships its own `useNetworkState()` hook —
    no manual `addEventListener`/`useState` plumbing needed, which simplified `network-status.ts`
    below what the original snippet proposed.
 2. **No `ApiErrorType` enum, and none was needed.** The real `ApiError` class

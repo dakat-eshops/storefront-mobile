@@ -59,7 +59,7 @@ export default function SearchScreen() {
           if (hasNextPage && !isFetchingNextPage) fetchNextPage();
         }}
         ListEmptyComponent={
-          isLoading ? null : (
+          isLoading ? undefined : (
             <View style={styles.empty}>
               <ThemedText>
                 {q ? `No results for “${q}”` : 'Start typing to search.'}

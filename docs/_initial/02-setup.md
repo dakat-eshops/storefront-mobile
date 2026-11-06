@@ -36,7 +36,7 @@ Pin the SDK in `package.json` (Expo SDK 53 = RN 0.79; bump to 54 once stable):
 
 ```bash
 pnpm add \
-  @clerk/clerk-expo \
+  @clerk/expo \
   @supabase/supabase-js \
   @tanstack/react-query @tanstack/query-async-storage-persister @tanstack/react-query-persist-client \
   @tanstack/react-db @tanstack/db @tanstack/query-db-collection \
@@ -203,7 +203,8 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(monorepoRoot, 'node_modules'),
 ];
-config.resolver.disableHierarchicalLookup = true;
+// Keep hierarchical lookup ON (Expo default): disabling it hides nested
+// node_modules and breaks deps that need a different major than the root hoist.
 // Block the runtime entrypoint of @eshops/db from RN bundles
 config.resolver.blockList = [
   /BO\/e-Shops\/packages\/db\/src\/(?!types).*\.ts$/,
