@@ -3,8 +3,12 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": ["./*"],
-      "@eshops/db/types": ["../../BO/e-Shops/packages/db/src/index.ts"]
+      "@/*": [
+        "./*"
+      ],
+      "@eshops/db/types": [
+        "../../BO/e-Shops/packages/db/src/index.ts"
+      ]
     }
   },
   "include": [
@@ -12,5 +16,8 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
+  ],
+  "exclude": [
+    "**/*.test.ts"
   ]
 }

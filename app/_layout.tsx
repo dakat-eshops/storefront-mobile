@@ -1,4 +1,3 @@
-import { ClerkLoaded, ClerkProvider } from "@clerk/expo";
 import {
 	DarkTheme,
 	DefaultTheme,
@@ -14,7 +13,7 @@ import "react-native-reanimated";
 import { ConnectivityBanner } from "@/components/connectivity-banner";
 import { CartSyncProvider } from "@/features/cart/components/cart-sync-provider";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { tokenCache } from "@/libs/clerk-token-cache";
+import { AuthRoot } from "@/libs/auth/provider";
 import { env } from "@/libs/env";
 import { registerNotificationHandlers } from "@/libs/notifications";
 import { PushRegistrationBootstrap } from "@/libs/push-registration-bootstrap";
@@ -28,7 +27,7 @@ export const unstable_settings = {
 export default function RootLayout() {
 	const colorScheme = useColorScheme();
 
-	// Register push notification handlers once the router is mounted (inside ClerkLoaded).
+	// Register push notification handlers once the router is mounted.
 	// The cleanup function removes listeners on unmount.
 	useEffect(() => {
 		const cleanup = registerNotificationHandlers();
@@ -36,11 +35,8 @@ export default function RootLayout() {
 	}, []);
 
 	return (
-		<ClerkProvider
-			tokenCache={tokenCache}
-			publishableKey={env.clerkPublishableKey}
-		>
-			<ClerkLoaded>
+		// BetterAuth (default) or Clerk, chosen at bundle time — libs/auth/.
+		<AuthRoot>
 				<PersistQueryClientProvider
 					client={queryClient}
 					persistOptions={{ persister, buster: env.appVersion }}
@@ -98,7 +94,6 @@ export default function RootLayout() {
 						</RealtimeProvider>
 					</CartSyncProvider>
 				</PersistQueryClientProvider>
-			</ClerkLoaded>
-		</ClerkProvider>
+		</AuthRoot>
 	);
 }

@@ -7,6 +7,7 @@ Documentation for the FO React Native app. Organized by phase so each batch of d
 | Folder | Scope |
 | --- | --- |
 | [_initial/](./_initial/README.md) | The initial design set — architecture, setup, auth, API client, data layer, realtime, navigation, push, shared code, build/deploy. Written before/during Vertical-1 (browse + cart). Treat as **historical design intent**, not a live changelog. |
+| [auth/](./auth/README.md) | **Sign-in: BetterAuth (default) or Clerk, chosen at bundle time** — provider-agnostic `useAuth()`, Metro alias, NestJS token mint + cache, 401 re-mint, admin two-factor step. Supersedes the Clerk-only `_initial/03-authentication.md`. |
 | [cart/](./cart/README.md) | Shopee-style cart item selection — `useCartSelection` hook, `ThreeStateCheckbox`, sticky bottom bar, Zustand cross-step handoff. Includes the cart code map + server-cart migration status. |
 | [products/](./products/README.md) | PLP + PDP surfaces — code map, data source (`/fo-mobile/.../products` via `useApiClient`), related realtime/scan docs. |
 | [content/](./content/README.md) | CMS content consumption (banners, policies, FAQs) via the NestJS content API — envelope, locale fallback, consent version pinning, rich text. |

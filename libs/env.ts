@@ -6,7 +6,17 @@ export const env = {
   apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL!,
   apiVersion: process.env.EXPO_PUBLIC_API_VERSION ?? '2026-01',
   defaultStoreId: process.env.EXPO_PUBLIC_DEFAULT_STORE_ID!,
-  clerkPublishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!,
+  /**
+   * Must match the store's `stores.auth_provider` (BO). `betterauth` (default)
+   * or `clerk` (Platform-Owner exception). Bundle-time — see metro.config.js.
+   */
+  authProvider: (process.env.EXPO_PUBLIC_AUTH_PROVIDER === 'clerk'
+    ? 'clerk'
+    : 'betterauth') as 'betterauth' | 'clerk',
+  /** BetterAuth server = this store's FO web origin. Defaults to EXPO_PUBLIC_FO_WEB_URL. */
+  authBaseUrl:
+    process.env.EXPO_PUBLIC_AUTH_BASE_URL ?? process.env.EXPO_PUBLIC_FO_WEB_URL ?? '',
+  clerkPublishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? '',
   supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL!,
   supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!,
   googleCloudProjectNumber: process.env.EXPO_PUBLIC_GOOGLE_CLOUD_PROJECT_NUMBER,
@@ -21,7 +31,7 @@ if (__DEV__) {
   const required = [
     'apiBaseUrl',
     'defaultStoreId',
-    'clerkPublishableKey',
+    env.authProvider === 'clerk' ? 'clerkPublishableKey' : 'authBaseUrl',
     'supabaseUrl',
     'supabaseAnonKey',
   ] as const;

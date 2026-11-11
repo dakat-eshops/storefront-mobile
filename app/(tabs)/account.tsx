@@ -1,4 +1,3 @@
-import { useAuth, useUser } from '@clerk/expo';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -7,13 +6,13 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
+import { useAuth } from '@/libs/auth/provider';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { supabase } from '@/libs/supabase';
 
 export default function AccountScreen() {
   const scheme = useColorScheme() ?? 'light';
-  const { isSignedIn, signOut } = useAuth();
-  const { user } = useUser();
+  const { isSignedIn, signOut, displayName } = useAuth();
   const tint = Colors[scheme].tint;
   const queryClient = useQueryClient();
 
@@ -23,7 +22,7 @@ export default function AccountScreen() {
         <ThemedText type="title">Account</ThemedText>
         {isSignedIn ? (
           <ThemedText style={styles.greeting}>
-            {user?.firstName ?? user?.primaryEmailAddress?.emailAddress ?? 'Welcome'}
+            {displayName ?? 'Welcome'}
           </ThemedText>
         ) : null}
       </ThemedView>

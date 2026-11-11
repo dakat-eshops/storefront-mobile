@@ -1,4 +1,4 @@
-import { useAuth } from '@clerk/expo';
+import { useAuth } from '@/libs/auth/provider';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useApiClient } from '@/libs/api-client';
 import { orderQueryKeys } from '../collections/queryKeys';

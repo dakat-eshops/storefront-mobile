@@ -1,4 +1,4 @@
-import { useAuth } from '@clerk/expo';
+import { useAuth } from '@/libs/auth/provider';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, type PropsWithChildren } from 'react';
 import { cartQueryKeys } from '../collections/queryKeys';
@@ -8,7 +8,7 @@ import { readCart } from '../collections/storage';
  * Guest ↔ authed cart sync stub.
  *
  * Per docs/_initial/05-data-layer.md the flow is:
- *   1. Listen to Clerk `isSignedIn` transitions.
+ *   1. Listen to `isSignedIn` transitions (BetterAuth or Clerk — libs/auth/).
  *   2. On `false → true`: read MMKV cart, POST `/cart/sync`, clear MMKV on
  *      success, invalidate `cartQueryKeys.all`.
  *

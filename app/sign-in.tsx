@@ -1,4 +1,3 @@
-import { useSignIn } from '@clerk/expo';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
@@ -6,42 +5,39 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { type SignInResult, useSignIn } from '@/libs/auth/provider';
 
 /**
- * Minimal email + password sign-in. Per docs/_initial/03-authentication.md
- * Clerk Expo SDK owns the session; we just call signIn.password + finalize.
- *
- * Sign-up, OAuth, and password reset live in future iterations; this screen
- * unblocks the cart-sync flow end-to-end.
+ * Email + password sign-in against the store's provider (BetterAuth by
+ * default, Clerk for the exception store — libs/auth/). Accounts with
+ * two-factor on (store admins) get a second step for the authenticator or a
+ * backup code. Sign-up, social sign-in and password reset are not in the app
+ * yet — docs/auth/README.md.
  */
 export default function SignInScreen() {
   const scheme = useColorScheme() ?? 'light';
   const router = useRouter();
-  const { signIn } = useSignIn();
+  const { signInWithPassword, submitCode } = useSignIn();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
+  const [needsCode, setNeedsCode] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const onSubmit = async () => {
+  const handle = (result: SignInResult) => {
+    if (result.status === 'signed-in') {
+      router.back();
+    } else if (result.status === 'needs-code') {
+      setNeedsCode(true);
+    } else {
+      Alert.alert('Sign-in failed', result.message);
+    }
+  };
+
+  const run = async (action: () => Promise<SignInResult>) => {
     setBusy(true);
     try {
-      // Clerk Core 3: methods resolve { error } instead of throwing, and
-      // `signIn` reflects the updated attempt once they settle.
-      const { error } = await signIn.password({ identifier: email, password });
-      if (error) {
-        Alert.alert('Sign-in failed', error.longMessage ?? error.message);
-        return;
-      }
-      if (signIn.status === 'complete') {
-        const { error: finalizeError } = await signIn.finalize();
-        if (finalizeError) {
-          Alert.alert('Sign-in failed', finalizeError.longMessage ?? finalizeError.message);
-          return;
-        }
-        router.back();
-      } else {
-        Alert.alert('Sign-in incomplete', `Status: ${signIn.status}`);
-      }
+      handle(await action());
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       Alert.alert('Sign-in failed', message);
@@ -50,43 +46,78 @@ export default function SignInScreen() {
     }
   };
 
+  const inputStyle = [
+    styles.input,
+    { color: Colors[scheme].text, borderColor: Colors[scheme].icon },
+  ];
+
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
       <View style={styles.body}>
         <ThemedText type="title">Sign in</ThemedText>
-        <TextInput
-          style={[
-            styles.input,
-            { color: Colors[scheme].text, borderColor: Colors[scheme].icon },
-          ]}
-          placeholder="Email"
-          placeholderTextColor={Colors[scheme].icon}
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="email-address"
-        />
-        <TextInput
-          style={[
-            styles.input,
-            { color: Colors[scheme].text, borderColor: Colors[scheme].icon },
-          ]}
-          placeholder="Password"
-          placeholderTextColor={Colors[scheme].icon}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-        <Pressable
-          disabled={busy}
-          onPress={onSubmit}
-          style={[styles.cta, { backgroundColor: Colors[scheme].tint }]}
-        >
-          <ThemedText style={styles.ctaText}>
-            {busy ? 'Signing in…' : 'Sign in'}
-          </ThemedText>
-        </Pressable>
+        {needsCode ? (
+          <>
+            <ThemedText>
+              Enter the 6-digit code from your authenticator app, or a backup code.
+            </ThemedText>
+            <TextInput
+              style={inputStyle}
+              placeholder="Code"
+              placeholderTextColor={Colors[scheme].icon}
+              value={code}
+              onChangeText={setCode}
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="number-pad"
+              textContentType="oneTimeCode"
+              autoComplete="one-time-code"
+              autoFocus
+            />
+            <Pressable
+              disabled={busy || code.trim().length === 0}
+              onPress={() => run(() => submitCode(code))}
+              style={[styles.cta, { backgroundColor: Colors[scheme].tint }]}
+            >
+              <ThemedText style={styles.ctaText}>
+                {busy ? 'Verifying…' : 'Verify'}
+              </ThemedText>
+            </Pressable>
+          </>
+        ) : (
+          <>
+            <TextInput
+              style={inputStyle}
+              placeholder="Email"
+              placeholderTextColor={Colors[scheme].icon}
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="email-address"
+              textContentType="username"
+              autoComplete="email"
+            />
+            <TextInput
+              style={inputStyle}
+              placeholder="Password"
+              placeholderTextColor={Colors[scheme].icon}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              textContentType="password"
+              autoComplete="current-password"
+            />
+            <Pressable
+              disabled={busy}
+              onPress={() => run(() => signInWithPassword(email.trim(), password))}
+              style={[styles.cta, { backgroundColor: Colors[scheme].tint }]}
+            >
+              <ThemedText style={styles.ctaText}>
+                {busy ? 'Signing in…' : 'Sign in'}
+              </ThemedText>
+            </Pressable>
+          </>
+        )}
       </View>
     </SafeAreaView>
   );

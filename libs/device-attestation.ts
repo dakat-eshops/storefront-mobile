@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react';
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
-import { useAuth } from '@clerk/expo';
+import { type GetToken, useAuth } from '@/libs/auth/provider';
 import { env } from './env';
 
 /**
@@ -74,10 +74,15 @@ export function useDeviceAttestation() {
  * Endpoint per doc: POST /fo-mobile/me/attest-challenge
  */
 async function fetchChallenge(
-  getToken: ReturnType<typeof useAuth>['getToken'],
+  getToken: GetToken,
 ): Promise<string | null> {
   const jwt = await getToken();
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  // `fo-mobile/me` has no :storeId in its path; IdentityMobileGuard needs the
+  // store to pick the provider (and rejects a token without it).
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'x-store-id': env.defaultStoreId,
+  };
   if (jwt) headers.Authorization = `Bearer ${jwt}`;
 
   const res = await fetch(
