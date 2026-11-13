@@ -13,6 +13,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL,
     apiVersion: process.env.EXPO_PUBLIC_API_VERSION ?? '2026-01',
     defaultStoreId: process.env.EXPO_PUBLIC_DEFAULT_STORE_ID,
+    authProvider: process.env.EXPO_PUBLIC_AUTH_PROVIDER ?? 'betterauth',
+    authBaseUrl:
+      process.env.EXPO_PUBLIC_AUTH_BASE_URL ?? process.env.EXPO_PUBLIC_FO_WEB_URL,
     clerkPublishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
     supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
     supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,

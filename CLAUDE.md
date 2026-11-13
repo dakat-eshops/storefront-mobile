@@ -2,7 +2,7 @@
 
 Guidance for Claude Code when working with this repository (**FO Mobile** — the React Native / Expo customer storefront).
 
-**Context**: This is the **third surface** of the e-Shops system — the native sibling of the Next.js FO web app (`FO/KhanhStore`). Same NestJS backend, same Clerk identity, same `@eshops/db` types (types only). It exists to capture mobile-only affordances — push notifications, offline cart, QR display, deep links, native payment app-switch — **not** to re-implement the web storefront.
+**Context**: This is the **third surface** of the e-Shops system — the native sibling of the Next.js FO web app (`FO/KhanhStore`). Same NestJS backend, same identity provider as the store's web FO (BetterAuth by default, Clerk for the exception store — [docs/auth/](docs/auth/README.md)), same `@eshops/db` types (types only). It exists to capture mobile-only affordances — push notifications, offline cart, QR display, deep links, native payment app-switch — **not** to re-implement the web storefront.
 
 **System architecture** (three repos, one backend):
 
@@ -10,10 +10,10 @@ Guidance for Claude Code when working with this repository (**FO Mobile** — th
 | --- | --- | --- | --- |
 | `BO/e-Shops` | Next.js admin + NestJS API (`apps/api/`) | Admin + shared backend | `/2026-01/stores/:storeId/...` (Supabase Bearer + `INTERNAL_API_KEY`) |
 | `FO/KhanhStore` | Next.js (web storefront) | Customer web | `/2026-01/fo/stores/:storeId/...` (HMAC, server-side) |
-| `FO/storefront-mobile` (this repo) | Expo / React Native | Customer native | `/2026-01/fo-mobile/stores/:storeId/...` (Clerk JWT + device attestation, **no HMAC**) |
+| `FO/storefront-mobile` (this repo) | Expo / React Native | Customer native | `/2026-01/fo-mobile/stores/:storeId/...` (BetterAuth or Clerk JWT + device attestation, **no HMAC**) |
 
 - **Multi-tenant**: each mobile build targets exactly one store via `EXPO_PUBLIC_DEFAULT_STORE_ID`.
-- **Auth separation**: Clerk only (same Clerk org as web FO). Never touch Supabase Auth — the Supabase anon key here is for **Broadcast subscriptions only**.
+- **Auth separation**: the store's provider, matching its web FO and BO `stores.auth_provider` — BetterAuth (default) or Clerk (exception), chosen at bundle time by `EXPO_PUBLIC_AUTH_PROVIDER`. Code imports `@/libs/auth/provider`, never `@clerk/expo` or the BetterAuth client directly ([docs/auth/](docs/auth/README.md)). Never touch Supabase Auth — the Supabase anon key here is for **Broadcast subscriptions only**.
 - **Cross-repo rule**: any FO feature (cart, checkout, orders, cancel/return, payments, wishlist, realtime, loyalty) must be considered for **both** FO surfaces. A feature that ships on web but is absent/broken on mobile is incomplete work.
 
 ## Use the Skills — ALWAYS (CRITICAL)
@@ -44,7 +44,7 @@ A mobile binary is statically analysable. **This app never ships a secret.**
 
 - **Never bundle** `BO_WEBHOOK_SECRET`, `fo_api_secret`, HMAC keys, `INTERNAL_API_KEY`, or any Supabase service key. There is no `EXPO_PUBLIC_*` variant of any secret — if a value must stay private, mobile cannot hold it, period.
 - The web FO signs NestJS requests with a per-store HMAC secret **server-side**. Mobile cannot replicate that, so it talks to a parallel controller set at **`/2026-01/fo-mobile/stores/:storeId/*`** (BO repo: `apps/api/src/modules/fo-mobile/`), guarded by:
-  1. `ClerkMobileGuard` — optional Clerk JWT Bearer (anonymous fallback allowed for public reads; cart/orders require `profileId`)
+  1. `IdentityMobileGuard` — optional Bearer JWT, verified as BetterAuth or Clerk per the store's `stores.auth_provider` (anonymous fallback allowed for public reads; cart/orders require `profileId`). Send `x-store-id` (the API client does) — `fo-mobile/me/*` has no `:storeId` in its path
   2. `DeviceAttestationGuard` — `x-device-attestation` header (iOS App Attest / Android Play Integrity). Dev-mode-permissive (`__unsupported__` accepted outside production); fails closed in production. Client side is a skeleton — see [libs/device-attestation.ts](libs/device-attestation.ts).
 - The global NestJS `ApiKeyGuard` skips both `/fo/*` and `/fo-mobile/*`. Admin routes (`/2026-01/stores/...`) are off-limits from mobile.
 - **Versioning convention** (matches BO CLAUDE.md): the `fo-mobile/` segment lives in the controller **path**, never in the version. Routes are `/2026-01/fo-mobile/...` — there is no `/fo-mobile/2026-01/...`.
@@ -110,7 +110,7 @@ The web FO documents the same customer features from the web side — check the 
 | [docs/cart/](docs/cart/README.md) | `KhanhStore/docs/commerce/cart/` + `CART_SYNC_IMPLEMENTATION.md` | Web = TanStack DB collections + `sessionStorage` handoff; mobile = MMKV + Zustand (RN has neither `window` nor `sessionStorage`) |
 | [docs/wishlist/](docs/wishlist/README.md) | `KhanhStore/docs/commerce/wishlist/` | Web has the per-store BO enable toggle — honour it on mobile too |
 | [docs/orders/](docs/orders/README.md) | `KhanhStore/docs/commerce/orders/order-history/` | Same status lifecycle; mobile adds push deep links + QR |
-| [docs/cancel-return/](docs/cancel-return/README.md) | `KhanhStore/docs/cancel_and_return_orders/` | Web reaches NestJS via HMAC; mobile via `/fo-mobile/` (Clerk + attestation) |
+| [docs/cancel-return/](docs/cancel-return/README.md) | `KhanhStore/docs/cancel_and_return_orders/` | Web reaches NestJS via HMAC; mobile via `/fo-mobile/` (store JWT + attestation) |
 | [docs/loyalty-points/](docs/loyalty-points/README.md) | `KhanhStore/docs/loyalty_points/` | FO web owns the wallet; mobile is a passive consumer + push restoration |
 | [docs/payments/](docs/payments/README.md) | `KhanhStore/docs/commerce/payments/` | Mobile adds app-switch + VietQR polling flavors |
 | [docs/products/](docs/products/README.md) | `KhanhStore/docs/commerce/products/` + `pdp/` + `plp/` | Web PDP/PLP guides define display + realtime behavior mobile mirrors |
@@ -131,6 +131,7 @@ pnpm start                 # Expo dev server (Expo Go where possible)
 pnpm ios                   # expo start --ios
 pnpm android               # expo start --android
 pnpm lint                  # expo lint (ESLint, eslint-config-expo flat)
+pnpm test:unit             # node --test libs/**/*.test.ts (pure modules only, e.g. the auth token cache)
 npx tsc --noEmit           # type check (strict mode, no dedicated script yet)
 
 # Native-module features (attestation, camera on some SDKs) need a dev client:
@@ -138,7 +139,7 @@ pnpm expo run:ios          # or: pnpm expo run:android
 ```
 
 - **No database in this repo** — mobile owns no Postgres. All persistence is MMKV (device) or the NestJS backend. There are no `db:*` commands and no migrations here; schema changes happen in the BO repo (and are run manually by the user there).
-- **No test suite is wired yet.** When adding one, follow the BO/FO testing philosophy (factories, AAA, `describe.each`) — and document the setup in `docs/`.
+- **No RN component/hook test suite is wired yet** (`pnpm test:unit` runs `node --test` on pure, RN-free modules only). When adding one, follow the BO/FO testing philosophy (factories, AAA, `describe.each`) — and document the setup in `docs/`.
 - `reset-project` script is an emergency Expo-starter reset — never run it.
 
 ## Tech Stack
@@ -146,7 +147,7 @@ pnpm expo run:ios          # or: pnpm expo run:android
 | Category | Technologies |
 | --- | --- |
 | Framework | Expo ~54 / React Native 0.81 / React 19 + **Expo Router** (file-based, typed routes) |
-| Auth | Clerk (`@clerk/expo`) — token cache in `expo-secure-store` ([libs/clerk-token-cache.ts](libs/clerk-token-cache.ts)) |
+| Auth | BetterAuth (`@better-auth/expo`, default) or Clerk (`@clerk/expo`), one per bundle via Metro alias — [libs/auth/](libs/auth/), sessions in `expo-secure-store` ([docs/auth/](docs/auth/README.md)) |
 | Data | TanStack Query v5 + MMKV persister (offline-first) — see Data Layer below |
 | Guest storage | `react-native-mmkv` (cart, wishlist, query cache) |
 | UI state | Zustand (checkout selection handoff only) |
@@ -159,7 +160,7 @@ pnpm expo run:ios          # or: pnpm expo run:android
 
 ```text
 app/                          # Expo Router routes
-  _layout.tsx                 # ClerkProvider → PersistQueryClient → CartSync → Realtime → PushBootstrap → Stack
+  _layout.tsx                 # AuthRoot → PersistQueryClient → CartSync → Realtime → PushBootstrap → Stack
   (tabs)/                     # Home / Search / Cart / Account
   product/[id].tsx            # PDP
   orders.tsx + orders/[orderId]/{index,cancel,return}.tsx
@@ -200,7 +201,7 @@ const products = await api.get<Product[]>('/products?limit=20');
 ```
 
 - Base path `${EXPO_PUBLIC_API_BASE_URL}/${apiVersion}/fo-mobile/stores/${defaultStoreId}` — callers pass only the sub-path.
-- Headers added automatically: `Authorization: Bearer <Clerk JWT>` (when signed in), `x-device-attestation` (when available), `x-app-version`.
+- Headers added automatically: `Authorization: Bearer <store JWT>` (when signed in; BetterAuth tokens minted from FO `/api/auth/token` and cached, re-minted once on 401), `x-store-id`, `x-device-attestation` (when available), `x-app-version`.
 - Responses are the standard `ApiResponse<T>` envelope; the client **unwraps `data`** and throws `ApiError` (with `status` + `body`) on failure. Hooks receive `T`, not the envelope.
 - **Never `fetch` NestJS directly from a screen or hook** — always via `useApiClient()` so auth/attestation headers and error normalization stay in one place.
 - **Never call web-FO paths** (`/fo/...`) or BO admin paths (`/stores/...`) from mobile.
@@ -252,7 +253,9 @@ All config is `EXPO_PUBLIC_*` — **inlined into the bundle at build time and th
 | `EXPO_PUBLIC_API_BASE_URL` | NestJS base URL (e.g. `http://localhost:4000`) |
 | `EXPO_PUBLIC_API_VERSION` | Defaults `2026-01` |
 | `EXPO_PUBLIC_DEFAULT_STORE_ID` | Per-tenant store UUID |
-| `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` | Same Clerk org as web FO (publishable — safe) |
+| `EXPO_PUBLIC_AUTH_PROVIDER` | `betterauth` (default) \| `clerk` — must match the store's `stores.auth_provider`; bundle-time |
+| `EXPO_PUBLIC_AUTH_BASE_URL` | BetterAuth server = the store's FO web origin (defaults to `EXPO_PUBLIC_FO_WEB_URL`) |
+| `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` | `clerk` builds only — same Clerk org as web FO (publishable — safe) |
 | `EXPO_PUBLIC_SUPABASE_URL` / `_ANON_KEY` | Broadcast subscribe only (anon — safe) |
 | `EXPO_PUBLIC_GOOGLE_CLOUD_PROJECT_NUMBER` | Play Integrity |
 | `EXPO_PUBLIC_APP_VERSION` | Query-cache buster |

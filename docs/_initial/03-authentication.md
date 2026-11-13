@@ -1,5 +1,7 @@
 # 03 · Authentication (Clerk)
 
+> **Superseded 2026-11-12 by [../auth/](../auth/README.md).** BetterAuth is now the default provider (Clerk only for the exception store), behind a provider-agnostic `@/libs/auth/provider`. This page is the historical Clerk design and still describes `clerk` builds.
+
 Same Clerk organization as the web FO. A user who signed up on the web can sign in on mobile and vice versa.
 
 ## Token cache (SecureStore)

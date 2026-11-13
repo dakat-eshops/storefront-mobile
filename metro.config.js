@@ -28,4 +28,26 @@ config.resolver.blockList = [
   /BO\/e-Shops\/packages\/db\/src\/(?!index\.ts$).*\.ts$/,
 ];
 
+// Auth provider, chosen at bundle time like the web FO's AUTH_PROVIDER:
+// `@/libs/auth/provider` → provider.betterauth.tsx (default) or
+// provider.clerk.tsx. A build bundles ONE provider (no Clerk SDK in a
+// BetterAuth build). docs/auth/README.md.
+const AUTH_PROVIDER =
+  process.env.EXPO_PUBLIC_AUTH_PROVIDER === 'clerk' ? 'clerk' : 'betterauth';
+const AUTH_PROVIDER_FILE = path.resolve(
+  projectRoot,
+  `libs/auth/provider.${AUTH_PROVIDER}.tsx`,
+);
+const upstreamResolveRequest = config.resolver.resolveRequest;
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (moduleName === '@/libs/auth/provider') {
+    return { type: 'sourceFile', filePath: AUTH_PROVIDER_FILE };
+  }
+  return (upstreamResolveRequest ?? context.resolveRequest)(
+    context,
+    moduleName,
+    platform,
+  );
+};
+
 module.exports = config;

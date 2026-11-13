@@ -1,4 +1,4 @@
-import { useAuth } from '@clerk/expo';
+import { useAuth } from '@/libs/auth/provider';
 import { Link } from 'expo-router';
 import {
   ActivityIndicator,
